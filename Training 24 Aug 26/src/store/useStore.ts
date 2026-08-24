@@ -93,10 +93,13 @@ interface ATOStore {
   setIsAddInstructorModalOpen: (open: boolean) => void;
   isExportPrintModalOpen: boolean;
   setIsExportPrintModalOpen: (open: boolean) => void;
+  renewModalInstructor: InstructorProfile | null;
+  setRenewModalInstructor: (ins: InstructorProfile | null) => void;
 
-  // Dynamic CRUD
+  // Dynamic Operations & Qualifications
   addInstructor: (instructor: Omit<InstructorProfile, 'id' | 'avatar_initials' | 'is_locked_out'>) => void;
   updateInstructorStatus: (id: string, status: 'ACTIVE' | 'ON_LEAVE' | 'RESIGNED') => void;
+  renewInstructorRecurrent: (instructorId: string, checkDate: string, examinerName: string) => void;
   addBatch: (
     batch: Omit<TrainingBatch, 'id' | 'students_count' | 'progress_percentage'>,
     cadets: { full_name: string; student_number: string; airline: string; medical_class1_expiry?: string; contact_email?: string }[]
@@ -146,6 +149,8 @@ export const useStore = create<ATOStore>((set, get) => ({
   setIsAddInstructorModalOpen: (open) => set({ isAddInstructorModalOpen: open }),
   isExportPrintModalOpen: false,
   setIsExportPrintModalOpen: (open) => set({ isExportPrintModalOpen: open }),
+  renewModalInstructor: null,
+  setRenewModalInstructor: (ins) => set({ renewModalInstructor: ins }),
 
   organisation: ATO_ORGANISATION,
   fleets: ATO_FLEETS,
@@ -162,6 +167,58 @@ export const useStore = create<ATOStore>((set, get) => ({
 
   selectedBatchId: ATO_BATCHES[0].id, // Batch 26A (IndiGo A320)
   setSelectedBatchId: (id) => set({ selectedBatchId: id }),
+
+  renewInstructorRecurrent: (instructorId, checkDate, examinerName) => {
+    const instructor = get().instructors.find((i) => i.id === instructorId);
+    if (!instructor) return;
+
+    // Month map to roll 1 year forward preserving base month
+    const monthMap: { [key: string]: { num: string; startGrace: string } } = {
+      January: { num: '01', startGrace: '11' },
+      February: { num: '02', startGrace: '12' },
+      March: { num: '03', startGrace: '01' },
+      April: { num: '04', startGrace: '02' },
+      May: { num: '05', startGrace: '03' },
+      June: { num: '06', startGrace: '04' },
+      July: { num: '07', startGrace: '05' },
+      August: { num: '08', startGrace: '06' },
+      September: { num: '09', startGrace: '07' },
+      October: { num: '10', startGrace: '08' },
+      November: { num: '11', startGrace: '09' },
+      December: { num: '12', startGrace: '10' },
+    };
+
+    const bMonth = instructor.base_month || 'September';
+    const monthNum = monthMap[bMonth]?.num || '09';
+    const startGraceNum = monthMap[bMonth]?.startGrace || '07';
+
+    // Next year forward
+    const nextYear = 2027;
+    const newRecurrentExpiry = `${nextYear}-${monthNum}-30`;
+    const newRecurrentWindowStart = `${nextYear}-${startGraceNum}-01`;
+
+    set((state) => ({
+      instructors: state.instructors.map((ins) =>
+        ins.id === instructorId
+          ? {
+              ...ins,
+              recurrent_expiry: newRecurrentExpiry,
+              recurrent_window_start: newRecurrentWindowStart,
+              recurrent_status: 'VALID',
+              currency_status: 'VALID',
+              is_locked_out: false,
+              lockout_reason: undefined,
+            }
+          : ins
+      ),
+    }));
+
+    get().addToast({
+      type: 'success',
+      title: 'Recurrent Check Logged',
+      message: `${instructor.full_name} completed annual check with ${examinerName || 'Designated Examiner'}. Base Month (${bMonth}) preserved until ${newRecurrentExpiry}.`,
+    });
+  },
 
   addInstructor: (newIns) => {
     const initials = newIns.full_name

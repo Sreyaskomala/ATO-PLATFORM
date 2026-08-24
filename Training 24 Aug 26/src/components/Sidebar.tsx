@@ -34,18 +34,18 @@ export const Sidebar: React.FC = () => {
     },
     {
       id: 'scheduler',
-      label: 'Session Dispatcher',
+      label: 'Flight & Sim Dispatcher',
       icon: <CalendarClock className="w-5 h-5" />,
-      badge: 'DGCA Validator',
+      badge: 'DGCA CAR',
     },
   ];
 
   const peopleAndTrainingNav: { id: ATOTab; label: string; icon: React.ReactNode; badge?: string }[] = [
     {
       id: 'instructors',
-      label: 'Instructor Legality Hub',
+      label: 'Instructor Qualifications',
       icon: <UserCheck className="w-5 h-5" />,
-      badge: 'FDTL & Recurrent',
+      badge: '5-Yr & Recurrent',
     },
     {
       id: 'pipeline',

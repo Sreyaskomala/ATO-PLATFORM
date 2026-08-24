@@ -18,7 +18,17 @@ import {
 } from 'lucide-react';
 
 export const InstructorLegalityMatrix: React.FC = () => {
-  const { instructors, schedules, dutyLogs, setSelectedInstructorId, setActiveTab, setIsAddInstructorModalOpen, updateInstructorStatus } = useStore();
+  const {
+    instructors,
+    schedules,
+    dutyLogs,
+    setSelectedInstructorId,
+    setActiveTab,
+    setIsAddInstructorModalOpen,
+    updateInstructorStatus,
+    setRenewModalInstructor,
+  } = useStore();
+
   const [roleFilter, setRoleFilter] = useState<string>('ALL');
   const [fleetFilter, setFleetFilter] = useState<string>('ALL');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
@@ -37,10 +47,12 @@ export const InstructorLegalityMatrix: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <UserCheck className="w-6 h-6 text-skyline-400" />
-            <h2 className="font-heading font-extrabold text-2xl text-white">Instructor Approval & Legality Matrix</h2>
+            <h2 className="font-heading font-extrabold text-2xl text-white">
+              Flight Instructor Qualifications & Roster
+            </h2>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            DGCA Civil Aviation Requirements (CAR Section 7): SFI / SFE / GI 5-Year Authorisations, Annual Recurrent 3-Month Grace Windows & FDTL Limits
+            DGCA Civil Aviation Requirements: SFI / SFE / GI 5-Year Approvals, Annual Recurrent Base Month Grace Windows & Flight Duty Time Limitations
           </p>
         </div>
 
@@ -91,7 +103,7 @@ export const InstructorLegalityMatrix: React.FC = () => {
         </div>
       </div>
 
-      {/* Direct Whiteboard Representation Matrix */}
+      {/* Roster & Qualifications Matrix */}
       <div className="p-6 rounded-3xl bg-aviation-900/80 border border-aviation-800 backdrop-blur-xl overflow-x-auto">
         <table className="w-full text-left border-collapse text-xs">
           <thead>
@@ -104,7 +116,7 @@ export const InstructorLegalityMatrix: React.FC = () => {
               <th className="pb-3 font-semibold">24H FDTL (≤6h)</th>
               <th className="pb-3 font-semibold">7D FDTL (≤30h)</th>
               <th className="pb-3 font-semibold">STATUS</th>
-              <th className="pb-3 font-semibold text-right">ACTION</th>
+              <th className="pb-3 font-semibold text-right">ACTIONS & RENEWAL</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-aviation-800/60">
@@ -117,6 +129,8 @@ export const InstructorLegalityMatrix: React.FC = () => {
                 schedules,
                 dutyLogs
               );
+
+              const isWindowOpen = ins.recurrent_status === 'EXPIRING' || ins.is_locked_out;
 
               return (
                 <tr key={ins.id} className="hover:bg-aviation-950/40 transition-colors">
@@ -243,17 +257,30 @@ export const InstructorLegalityMatrix: React.FC = () => {
                     )}
                   </td>
 
-                  {/* Action / Employment Toggle */}
+                  {/* Actions: Renew Check + Status Toggle */}
                   <td className="py-4 text-right">
-                    <select
-                      value={ins.employment_status || 'ACTIVE'}
-                      onChange={(e) => updateInstructorStatus(ins.id, e.target.value as any)}
-                      className="bg-aviation-950 border border-aviation-800 rounded-lg px-2.5 py-1 text-[11px] font-mono text-slate-200 focus:border-skyline-500 focus:outline-none"
-                    >
-                      <option value="ACTIVE">Active</option>
-                      <option value="ON_LEAVE">On Leave</option>
-                      <option value="RESIGNED">Resigned</option>
-                    </select>
+                    <div className="flex items-center justify-end gap-2">
+                      {isWindowOpen && (
+                        <button
+                          onClick={() => setRenewModalInstructor(ins)}
+                          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-[11px] font-mono font-semibold transition-all shadow-sm"
+                          title="Log Completed Recurrent Check"
+                        >
+                          <RotateCw className="w-3 h-3" />
+                          <span>Renew Check</span>
+                        </button>
+                      )}
+
+                      <select
+                        value={ins.employment_status || 'ACTIVE'}
+                        onChange={(e) => updateInstructorStatus(ins.id, e.target.value as any)}
+                        className="bg-aviation-950 border border-aviation-800 rounded-lg px-2 py-1 text-[11px] font-mono text-slate-200 focus:border-skyline-500 focus:outline-none"
+                      >
+                        <option value="ACTIVE">Active</option>
+                        <option value="ON_LEAVE">On Leave</option>
+                        <option value="RESIGNED">Resigned</option>
+                      </select>
+                    </div>
                   </td>
                 </tr>
               );

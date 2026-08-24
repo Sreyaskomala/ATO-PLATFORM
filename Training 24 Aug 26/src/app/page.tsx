@@ -14,6 +14,7 @@ import { SchemaExplorer } from '@/components/SchemaExplorer';
 import { AddInstructorModal } from '@/components/AddInstructorModal';
 import { CreateBatchModal } from '@/components/CreateBatchModal';
 import { ExportPrintModal } from '@/components/ExportPrintModal';
+import { RenewRecurrentModal } from '@/components/RenewRecurrentModal';
 
 export default function Home() {
   const { activeTab } = useStore();
@@ -44,6 +45,7 @@ export default function Home() {
       <AddInstructorModal />
       <CreateBatchModal />
       <ExportPrintModal />
+      <RenewRecurrentModal />
     </div>
   );
 }
