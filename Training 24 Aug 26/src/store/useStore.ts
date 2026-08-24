@@ -26,12 +26,15 @@ import {
 import { validateATOSchedulingMatrix, calculateInstructorDutyFDTL } from '@/lib/compliance';
 
 export type ATOTab =
-  | 'pipeline'     // Batch Training Progression Pipeline
-  | 'scheduler'    // Master Flight Operations Scheduler
-  | 'instructors'  // Instructor Approval, Legality & Recurrent Matrix
-  | 'roster'       // Simulator Gantt & Daily Flight Roster
+  | 'dashboard'    // All-in-One Executive Operations Cockpit
+  | 'calendar'     // Master Calendar (Day / Week / Month / Year)
+  | 'scheduler'    // Session Dispatcher & Validation Workbench
+  | 'instructors'  // Instructor Legality & Recurrent Hub
+  | 'pipeline'     // Cadet Training Progression & CBTA Matrix
   | 'fleets'       // Fleet Types & FSTD Simulators
   | 'schema';      // PostgreSQL & DGCA Triggers
+
+export type CalendarViewMode = 'day' | 'week' | 'month' | 'year';
 
 export interface ToastAlert {
   id: string;
@@ -54,6 +57,18 @@ interface SchedulingFormState {
 interface ATOStore {
   activeTab: ATOTab;
   setActiveTab: (tab: ATOTab) => void;
+
+  // Master Calendar View State
+  calendarView: CalendarViewMode;
+  setCalendarView: (view: CalendarViewMode) => void;
+  selectedCalendarDate: string;
+  setSelectedCalendarDate: (date: string) => void;
+  selectedSessionModal: TrainingScheduleSession | null;
+  setSelectedSessionModal: (session: TrainingScheduleSession | null) => void;
+  calendarFleetFilter: string;
+  setCalendarFleetFilter: (fleetId: string) => void;
+  calendarResourceFilter: string;
+  setCalendarResourceFilter: (resourceId: string) => void;
 
   organisation: Organisation;
   fleets: AircraftFleet[];
@@ -90,8 +105,19 @@ interface ATOStore {
 }
 
 export const useStore = create<ATOStore>((set, get) => ({
-  activeTab: 'pipeline',
+  activeTab: 'dashboard',
   setActiveTab: (tab) => set({ activeTab: tab }),
+
+  calendarView: 'day',
+  setCalendarView: (view) => set({ calendarView: view }),
+  selectedCalendarDate: '2026-08-25',
+  setSelectedCalendarDate: (date) => set({ selectedCalendarDate: date }),
+  selectedSessionModal: null,
+  setSelectedSessionModal: (session) => set({ selectedSessionModal: session }),
+  calendarFleetFilter: 'ALL',
+  setCalendarFleetFilter: (fleetId) => set({ calendarFleetFilter: fleetId }),
+  calendarResourceFilter: 'ALL',
+  setCalendarResourceFilter: (resourceId) => set({ calendarResourceFilter: resourceId }),
 
   organisation: ATO_ORGANISATION,
   fleets: ATO_FLEETS,

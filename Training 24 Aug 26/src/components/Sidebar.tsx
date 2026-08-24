@@ -7,6 +7,8 @@ import {
   CalendarClock,
   UserCheck,
   CalendarRange,
+  CalendarDays,
+  LayoutDashboard,
   Layers,
   Database,
   PlaneTakeoff,
@@ -17,38 +19,50 @@ import {
 export const Sidebar: React.FC = () => {
   const { activeTab, setActiveTab, organisation } = useStore();
 
-  const navItems: { id: ATOTab; label: string; icon: React.ReactNode; badge?: string }[] = [
+  const operationsNav: { id: ATOTab; label: string; icon: React.ReactNode; badge?: string }[] = [
     {
-      id: 'pipeline',
-      label: 'Batch Pipeline',
-      icon: <GraduationCap className="w-5 h-5" />,
-      badge: 'Progression',
+      id: 'dashboard',
+      label: 'Operations Cockpit',
+      icon: <LayoutDashboard className="w-5 h-5" />,
+      badge: 'Live',
+    },
+    {
+      id: 'calendar',
+      label: 'Master Calendar',
+      icon: <CalendarDays className="w-5 h-5" />,
+      badge: 'Day/Wk/Mo/Yr',
     },
     {
       id: 'scheduler',
-      label: 'Operational Scheduler',
+      label: 'Session Dispatcher',
       icon: <CalendarClock className="w-5 h-5" />,
-      badge: 'DGCA CAR',
+      badge: 'DGCA Validator',
     },
+  ];
+
+  const peopleAndTrainingNav: { id: ATOTab; label: string; icon: React.ReactNode; badge?: string }[] = [
     {
       id: 'instructors',
-      label: 'Instructor Matrix',
+      label: 'Instructor Legality Hub',
       icon: <UserCheck className="w-5 h-5" />,
-      badge: 'TRS Recurrent',
+      badge: 'FDTL & Recurrent',
     },
     {
-      id: 'roster',
-      label: 'Daily Ops & Timetable',
-      icon: <CalendarRange className="w-5 h-5" />,
+      id: 'pipeline',
+      label: 'Cadet Pipeline & CBTA',
+      icon: <GraduationCap className="w-5 h-5" />,
     },
+  ];
+
+  const fleetAndDbNav: { id: ATOTab; label: string; icon: React.ReactNode; badge?: string }[] = [
     {
       id: 'fleets',
-      label: 'Fleets & Simulators',
+      label: 'FSTD Fleet & Bays',
       icon: <Layers className="w-5 h-5" />,
     },
     {
       id: 'schema',
-      label: 'SQL & DGCA Triggers',
+      label: 'Database Schema & DDL',
       icon: <Database className="w-5 h-5" />,
     },
   ];
@@ -65,14 +79,14 @@ export const Sidebar: React.FC = () => {
             <div className="font-heading font-extrabold text-base tracking-wider text-white">
               AEROMATRIX<span className="text-skyline-400">ATO</span>
             </div>
-            <div className="text-[10px] font-mono text-slate-400">Airline Training Operations</div>
+            <div className="text-[10px] font-mono text-slate-400">Aviation Operations Platform</div>
           </div>
         </div>
       </div>
 
       {/* Tenant / Approval Card */}
-      <div className="p-4 mx-4 my-4 rounded-xl bg-aviation-900/80 border border-aviation-800 flex items-center gap-3">
-        <div className="w-9 h-9 rounded-lg bg-skyline-500/10 border border-skyline-500/30 flex items-center justify-center font-heading font-bold text-skyline-400 text-sm">
+      <div className="p-4 mx-4 my-3 rounded-2xl bg-aviation-900/80 border border-aviation-800 flex items-center gap-3">
+        <div className="w-9 h-9 rounded-xl bg-skyline-500/10 border border-skyline-500/30 flex items-center justify-center font-heading font-bold text-skyline-400 text-sm">
           GA
         </div>
         <div className="flex-1 min-w-0">
@@ -83,55 +97,94 @@ export const Sidebar: React.FC = () => {
       </div>
 
       {/* Navigation Menu */}
-      <nav className="flex-1 px-4 py-2 space-y-1.5 overflow-y-auto">
-        <div className="px-3 py-2 text-[10px] font-mono font-bold tracking-widest text-slate-500 uppercase">
-          TRAINING OPERATIONS
+      <nav className="flex-1 px-4 py-2 space-y-4 overflow-y-auto">
+        {/* Section 1: Operations */}
+        <div>
+          <div className="px-3 pb-2 text-[10px] font-mono font-bold tracking-widest text-slate-500 uppercase">
+            OPERATIONS
+          </div>
+          <div className="space-y-1">
+            {operationsNav.map((item) => {
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all text-left ${
+                    isActive
+                      ? 'bg-gradient-to-r from-skyline-500/20 to-indigo-500/10 text-skyline-400 border border-skyline-500/30 font-semibold shadow-glow-cyan'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-aviation-900/60 border border-transparent'
+                  }`}
+                >
+                  <span className={isActive ? 'text-skyline-400' : 'text-slate-400'}>{item.icon}</span>
+                  <span className="flex-1">{item.label}</span>
+                  {item.badge && (
+                    <span className="px-2 py-0.5 text-[9px] font-mono font-semibold rounded-full bg-skyline-500/20 text-skyline-300 border border-skyline-500/40">
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        {navItems.slice(0, 4).map((item) => {
-          const isActive = activeTab === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl font-medium text-sm transition-all text-left ${
-                isActive
-                  ? 'bg-gradient-to-r from-skyline-500/20 to-indigo-500/10 text-skyline-400 border border-skyline-500/30 font-semibold shadow-glow-cyan'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-aviation-900/60 border border-transparent'
-              }`}
-            >
-              <span className={isActive ? 'text-skyline-400' : 'text-slate-400'}>{item.icon}</span>
-              <span className="flex-1">{item.label}</span>
-              {item.badge && (
-                <span className="px-2 py-0.5 text-[9px] font-mono font-semibold rounded-full bg-skyline-500/20 text-skyline-300 border border-skyline-500/40">
-                  {item.badge}
-                </span>
-              )}
-            </button>
-          );
-        })}
-
-        <div className="pt-4 px-3 py-2 text-[10px] font-mono font-bold tracking-widest text-slate-500 uppercase">
-          FLEET & DATABASE
+        {/* Section 2: Training & People */}
+        <div>
+          <div className="px-3 pb-2 text-[10px] font-mono font-bold tracking-widest text-slate-500 uppercase">
+            PEOPLE & TRAINING
+          </div>
+          <div className="space-y-1">
+            {peopleAndTrainingNav.map((item) => {
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all text-left ${
+                    isActive
+                      ? 'bg-gradient-to-r from-skyline-500/20 to-indigo-500/10 text-skyline-400 border border-skyline-500/30 font-semibold shadow-glow-cyan'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-aviation-900/60 border border-transparent'
+                  }`}
+                >
+                  <span className={isActive ? 'text-skyline-400' : 'text-slate-400'}>{item.icon}</span>
+                  <span className="flex-1">{item.label}</span>
+                  {item.badge && (
+                    <span className="px-2 py-0.5 text-[9px] font-mono font-semibold rounded-full bg-skyline-500/20 text-skyline-300 border border-skyline-500/40">
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        {navItems.slice(4).map((item) => {
-          const isActive = activeTab === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl font-medium text-sm transition-all text-left ${
-                isActive
-                  ? 'bg-gradient-to-r from-skyline-500/20 to-indigo-500/10 text-skyline-400 border border-skyline-500/30 font-semibold shadow-glow-cyan'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-aviation-900/60 border border-transparent'
-              }`}
-            >
-              <span className={isActive ? 'text-skyline-400' : 'text-slate-400'}>{item.icon}</span>
-              <span className="flex-1">{item.label}</span>
-            </button>
-          );
-        })}
+        {/* Section 3: Fleet & Database */}
+        <div>
+          <div className="px-3 pb-2 text-[10px] font-mono font-bold tracking-widest text-slate-500 uppercase">
+            FLEET & DATABASE
+          </div>
+          <div className="space-y-1">
+            {fleetAndDbNav.map((item) => {
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all text-left ${
+                    isActive
+                      ? 'bg-gradient-to-r from-skyline-500/20 to-indigo-500/10 text-skyline-400 border border-skyline-500/30 font-semibold shadow-glow-cyan'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-aviation-900/60 border border-transparent'
+                  }`}
+                >
+                  <span className={isActive ? 'text-skyline-400' : 'text-slate-400'}>{item.icon}</span>
+                  <span className="flex-1">{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </nav>
 
       {/* Footer Status */}
