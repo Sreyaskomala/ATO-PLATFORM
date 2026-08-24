@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AeroMatrix ATO — Flight Operations & Training Platform</title>
+    <meta name="description" content="Next-generation ATO Training Management, FDTL Compliance, Simulator Resource Scheduling, and 20-Point Transactional Matrix Validation Platform.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dark-theme">
+    <!-- Main App Container -->
+    <div id="app" class="app-layout">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-logo">
+                    <div class="logo-icon">
+                        <i data-lucide="plane-takeoff"></i>
+                    </div>
+                    <div class="brand-text">
+                        <span class="brand-name">AeroMatrix<span class="highlight">ATO</span></span>
+                        <span class="brand-badge">DGCA / EASA</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tenant-selector">
+                <span class="tenant-label">ORGANISATION</span>
+                <div class="tenant-card">
+                    <div class="tenant-avatar">GA</div>
+                    <div class="tenant-info">
+                        <div class="tenant-name">GATA Flight Academy</div>
+                        <div class="tenant-id">ATO/IND/2026/042</div>
+                    </div>
+                    <i data-lucide="shield-check" class="tenant-verified"></i>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <div class="nav-group-title">OPERATIONS</div>
+                <button class="nav-item active" data-tab="tab-validator" id="nav-validator">
+                    <i data-lucide="shield-alert"></i>
+                    <span>Matrix Validator</span>
+                    <span class="nav-pill pulse">20-Point</span>
+                </button>
+                <button class="nav-item" data-tab="tab-instructor" id="nav-instructor">
+                    <i data-lucide="user-check"></i>
+                    <span>Instructor Dashboard</span>
+                </button>
+                <button class="nav-item" data-tab="tab-timeline" id="nav-timeline">
+                    <i data-lucide="calendar-range"></i>
+                    <span>Simulator Gantt</span>
+                </button>
+                
+                <div class="nav-group-title">FLEET & COMPLIANCE</div>
+                <button class="nav-item" data-tab="tab-resources" id="nav-resources">
+                    <i data-lucide="layers"></i>
+                    <span>Resources & Fleets</span>
+                </button>
+                <button class="nav-item" data-tab="tab-qualifications" id="nav-qualifications">
+                    <i data-lucide="award"></i>
+                    <span>Qualification Matrix</span>
+                </button>
+                <button class="nav-item" data-tab="tab-schema" id="nav-schema">
+                    <i data-lucide="database"></i>
+                    <span>Schema Explorer</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="system-status">
+                    <div class="status-indicator online"></div>
+                    <div class="status-details">
+                        <span class="status-title">Supabase Relational Core</span>
+                        <span class="status-subtitle">PostgreSQL + GiST Exclusion</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-viewport">
+            
+            <!-- Top App Bar -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <div class="current-page-title" id="page-title">
+                        <h2>20-Point Scheduling Matrix Validator</h2>
+                        <span class="page-subtitle">Pre-flight transactional validation engine enforcing qualification, aircraft compatibility, recurrent windows & FDTL limits</span>
+                    </div>
+                </div>
+                <div class="topbar-right">
+                    <div class="hud-stat">
+                        <span class="hud-label">FLEET AIRCRAFT</span>
+                        <span class="hud-value" id="hud-fleet-count">5 Types</span>
+                    </div>
+                    <div class="hud-stat">
+                        <span class="hud-label">ACTIVE SIMULATORS</span>
+                        <span class="hud-value text-emerald" id="hud-sim-count">3 Level-D</span>
+                    </div>
+                    <div class="hud-stat">
+                        <span class="hud-label">INSTRUCTORS</span>
+                        <span class="hud-value" id="hud-instructor-count">5 Active</span>
+                    </div>
+                    <button class="btn btn-primary" id="btn-quick-book">
+                        <i data-lucide="plus-circle"></i>
+                        <span>New Booking</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- TAB 1: 20-Point Matrix Validator & Booking Sandbox -->
+            <section class="tab-pane active" id="tab-validator">
+                <div class="validator-layout">
+                    
+                    <!-- Left: Booking Form Controls -->
+                    <div class="glass-card booking-config-panel">
+                        <div class="card-header">
+                            <div class="header-icon"><i data-lucide="sliders"></i></div>
+                            <div>
+                                <h3>Training Session Parameters</h3>
+                                <p class="text-muted">Configure operational parameters to test real-time 20-point validation</p>
+                            </div>
+                        </div>
+
+                        <!-- Presets for Fast Testing -->
+                        <div class="preset-section">
+                            <span class="preset-label">SCENARIO PRESETS:</span>
+                            <div class="preset-chips">
+                                <button class="chip active" data-preset="valid-a320">
+                                    <i data-lucide="check-circle-2"></i> Valid A320 FFS
+                                </button>
+                                <button class="chip" data-preset="fdtl-exceeded">
+                                    <i data-lucide="alert-triangle"></i> FDTL 24h Exceeded
+                                </button>
+                                <button class="chip" data-preset="sim-mismatch">
+                                    <i data-lucide="x-circle"></i> Sim-Aircraft Mismatch
+                                </button>
+                                <button class="chip" data-preset="expired-sfe">
+                                    <i data-lucide="clock"></i> Expired SFE Examiner
+                                </button>
+                                <button class="chip" data-preset="double-booking">
+                                    <i data-lucide="copy"></i> Overlap Collision
+                                </button>
+                            </div>
+                        </div>
+
+                        <form id="booking-form" class="form-grid">
+                            
+                            <div class="form-group">
+                                <label for="sel-course"><i data-lucide="book-open"></i> Course</label>
+                                <select id="sel-course" class="form-control"></select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="sel-lesson"><i data-lucide="file-text"></i> Syllabus Lesson</label>
+                                <select id="sel-lesson" class="form-control"></select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="sel-aircraft"><i data-lucide="plane"></i> Aircraft Variant</label>
+                                <select id="sel-aircraft" class="form-control"></select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="sel-resource"><i data-lucide="cpu"></i> Training Device / Resource</label>
+                                <select id="sel-resource" class="form-control"></select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="sel-instructor"><i data-lucide="user"></i> Assigned Instructor</label>
+                                <select id="sel-instructor" class="form-control"></select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="sel-student"><i data-lucide="graduation-cap"></i> Enrolled Student</label>
+                                <select id="sel-student" class="form-control"></select>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="input-date"><i data-lucide="calendar"></i> Session Date</label>
+                                    <input type="date" id="input-date" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label for="input-start-time"><i data-lucide="clock"></i> Start Time</label>
+                                    <input type="time" id="input-start-time" class="form-control" value="09:00">
+                                </div>
+                                <div class="form-group">
+                                    <label for="input-duration"><i data-lucide="timer"></i> Duration (Hours)</label>
+                                    <select id="input-duration" class="form-control">
+                                        <option value="120" selected>2.0 Hours (120 min)</option>
+                                        <option value="180">3.0 Hours (180 min)</option>
+                                        <option value="240">4.0 Hours (240 min)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" id="btn-run-validation">
+                                    <i data-lucide="play"></i>
+                                    <span>Run Validation Test</span>
+                                </button>
+                                <button type="submit" class="btn btn-primary" id="btn-submit-booking">
+                                    <i data-lucide="check-check"></i>
+                                    <span>Commit Confirmed Booking</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Right: Live 20-Point Matrix HUD & FDTL Status -->
+                    <div class="validator-results-panel">
+                        
+                        <!-- Result Verdict Banner -->
+                        <div class="verdict-banner" id="verdict-banner">
+                            <div class="verdict-status-icon" id="verdict-icon">
+                                <i data-lucide="shield-check"></i>
+                            </div>
+                            <div class="verdict-info">
+                                <div class="verdict-badge" id="verdict-badge">PASSED ALL CHECKS</div>
+                                <h3 id="verdict-title">Booking is 100% Compliant & Legal</h3>
+                                <p id="verdict-desc" class="text-muted">No qualification, FDTL or resource conflicts detected.</p>
+                            </div>
+                            <div class="verdict-meta">
+                                <span class="verdict-time" id="verdict-duration">120 Minutes</span>
+                                <span class="verdict-code" id="verdict-status-code">CONFIRMED</span>
+                            </div>
+                        </div>
+
+                        <!-- FDTL Gauges HUD Bar -->
+                        <div class="fdtl-hud-strip">
+                            <div class="hud-fdtl-card">
+                                <div class="fdtl-card-top">
+                                    <span class="fdtl-title">ROLLING 24-HOUR FDTL</span>
+                                    <span class="fdtl-limit">Limit: 6.0 Hours (360m)</span>
+                                </div>
+                                <div class="fdtl-bar-container">
+                                    <div class="fdtl-bar-fill" id="bar-fdtl-24h" style="width: 66%;"></div>
+                                </div>
+                                <div class="fdtl-card-bottom">
+                                    <span class="fdtl-metric" id="txt-fdtl-24h">4.0 / 6.0 hrs (66%)</span>
+                                    <span class="fdtl-remain text-emerald" id="txt-fdtl-24h-remain">2.0 hrs remaining</span>
+                                </div>
+                            </div>
+
+                            <div class="hud-fdtl-card">
+                                <div class="fdtl-card-top">
+                                    <span class="fdtl-title">ROLLING 7-DAY FDTL</span>
+                                    <span class="fdtl-limit">Limit: 30.0 Hours (1800m)</span>
+                                </div>
+                                <div class="fdtl-bar-container">
+                                    <div class="fdtl-bar-fill" id="bar-fdtl-7d" style="width: 53%;"></div>
+                                </div>
+                                <div class="fdtl-card-bottom">
+                                    <span class="fdtl-metric" id="txt-fdtl-7d">16.0 / 30.0 hrs (53%)</span>
+                                    <span class="fdtl-remain text-emerald" id="txt-fdtl-7d-remain">14.0 hrs remaining</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 20-Point Check Matrix Grid -->
+                        <div class="glass-card checks-matrix-card">
+                            <div class="card-header">
+                                <div class="header-icon"><i data-lucide="list-checks"></i></div>
+                                <div>
+                                    <h3>20-Point Compliance Checklist</h3>
+                                    <p class="text-muted">PostgreSQL Transactional Verification Matrix</p>
+                                </div>
+                                <div class="checks-summary-counter" id="checks-counter">
+                                    <span class="pass-count">20 Passed</span>
+                                    <span class="fail-count">0 Failed</span>
+                                </div>
+                            </div>
+
+                            <div class="checks-grid" id="checks-grid-container">
+                                <!-- Populated dynamically by app.js -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: Instructor Dashboard -->
+            <section class="tab-pane" id="tab-instructor">
+                <div class="instructor-view-layout">
+                    
+                    <!-- Instructor Selector Header -->
+                    <div class="glass-card instructor-selector-card">
+                        <div class="selector-header-left">
+                            <div class="instructor-avatar" id="ins-avatar">RS</div>
+                            <div class="instructor-meta">
+                                <div class="ins-name-row">
+                                    <h2 id="ins-name">Capt. Rahul Sharma</h2>
+                                    <span class="badge badge-emerald" id="ins-status-badge">ACTIVE</span>
+                                    <span class="badge badge-indigo" id="ins-emp-badge">FULL TIME</span>
+                                </div>
+                                <div class="ins-sub-row">
+                                    <span id="ins-id">Staff ID: INS-101</span>
+                                    <span class="dot-separator">•</span>
+                                    <span id="ins-dept">Flight Operations</span>
+                                    <span class="dot-separator">•</span>
+                                    <span id="ins-roles-tags">Roles: SFI, SFE</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="selector-header-right">
+                            <label for="switch-instructor-select">SWITCH INSTRUCTOR PROFILE:</label>
+                            <select id="switch-instructor-select" class="form-control form-control-sm"></select>
+                        </div>
+                    </div>
+
+                    <!-- HUD Row: Circular FDTL Gauges & Recurrent Window -->
+                    <div class="instructor-hud-grid">
+                        
+                        <!-- 24H Radial Gauge -->
+                        <div class="glass-card hud-radial-card">
+                            <div class="radial-gauge-wrapper">
+                                <svg class="progress-ring" width="120" height="120">
+                                    <circle class="progress-ring__circle-bg" stroke="rgba(255,255,255,0.08)" stroke-width="10" fill="transparent" r="48" cx="60" cy="60"/>
+                                    <circle id="gauge-24h-circle" class="progress-ring__circle text-cyan" stroke="currentColor" stroke-width="10" stroke-dasharray="301.59" stroke-dashoffset="100" stroke-linecap="round" fill="transparent" r="48" cx="60" cy="60"/>
+                                </svg>
+                                <div class="gauge-center-text">
+                                    <span class="gauge-value" id="gauge-24h-val">4.0h</span>
+                                    <span class="gauge-max">/ 6.0h</span>
+                                </div>
+                            </div>
+                            <div class="gauge-info">
+                                <h4>Rolling 24 Hours</h4>
+                                <p class="text-muted" id="gauge-24h-sub">2.0 Hours remaining today</p>
+                                <span class="gauge-status-pill text-emerald" id="gauge-24h-pill">Compliant</span>
+                            </div>
+                        </div>
+
+                        <!-- 7D Radial Gauge -->
+                        <div class="glass-card hud-radial-card">
+                            <div class="radial-gauge-wrapper">
+                                <svg class="progress-ring" width="120" height="120">
+                                    <circle class="progress-ring__circle-bg" stroke="rgba(255,255,255,0.08)" stroke-width="10" fill="transparent" r="48" cx="60" cy="60"/>
+                                    <circle id="gauge-7d-circle" class="progress-ring__circle text-indigo" stroke="currentColor" stroke-width="10" stroke-dasharray="301.59" stroke-dashoffset="140" stroke-linecap="round" fill="transparent" r="48" cx="60" cy="60"/>
+                                </svg>
+                                <div class="gauge-center-text">
+                                    <span class="gauge-value" id="gauge-7d-val">16.0h</span>
+                                    <span class="gauge-max">/ 30.0h</span>
+                                </div>
+                            </div>
+                            <div class="gauge-info">
+                                <h4>Rolling 7 Days</h4>
+                                <p class="text-muted" id="gauge-7d-sub">14.0 Hours remaining this week</p>
+                                <span class="gauge-status-pill text-emerald" id="gauge-7d-pill">Compliant</span>
+                            </div>
+                        </div>
+
+                        <!-- Recurrent Training Window Card -->
+                        <div class="glass-card recurrent-status-card">
+                            <div class="recurrent-header">
+                                <div class="card-icon-round"><i data-lucide="rotate-cw"></i></div>
+                                <div>
+                                    <h4>Recurrent Training Status</h4>
+                                    <span class="text-muted">Annual Standardization & Check</span>
+                                </div>
+                            </div>
+                            <div class="recurrent-body" id="ins-recurrent-body">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Grid: Today's Schedule & Qualifications List -->
+                    <div class="instructor-detail-grid">
+                        
+                        <!-- Today's Schedule Timeline -->
+                        <div class="glass-card">
+                            <div class="card-header">
+                                <div class="header-icon"><i data-lucide="clock"></i></div>
+                                <div>
+                                    <h3>Instructor Daily Roster</h3>
+                                    <p class="text-muted">Scheduled FFS, FTD and Briefing events</p>
+                                </div>
+                            </div>
+                            <div class="schedule-timeline" id="ins-schedule-timeline">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Qualifications & Ratings Card -->
+                        <div class="glass-card">
+                            <div class="card-header">
+                                <div class="header-icon"><i data-lucide="shield"></i></div>
+                                <div>
+                                    <h3>Active Aircraft Qualifications</h3>
+                                    <p class="text-muted">Regulatory Endorsements & Authorisations</p>
+                                </div>
+                            </div>
+                            <div class="qualifications-list" id="ins-qualifications-list">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- TAB 3: Simulator Timeline & Gantt -->
+            <section class="tab-pane" id="tab-timeline">
+                <div class="gantt-view-layout">
+                    
+                    <div class="glass-card gantt-header-card">
+                        <div class="gantt-controls-left">
+                            <div class="header-icon"><i data-lucide="calendar-clock"></i></div>
+                            <div>
+                                <h3>Simulator & Resource Allocation Matrix</h3>
+                                <p class="text-muted">Real-time device slot utilization with collision prevention</p>
+                            </div>
+                        </div>
+                        <div class="gantt-controls-right">
+                            <button class="btn btn-secondary btn-sm" id="btn-timeline-prev"><i data-lucide="chevron-left"></i></button>
+                            <span class="current-timeline-date" id="txt-timeline-date">Today, 24 Aug 2026</span>
+                            <button class="btn btn-secondary btn-sm" id="btn-timeline-next"><i data-lucide="chevron-right"></i></button>
+                            <button class="btn btn-primary btn-sm" id="btn-timeline-today">Today</button>
+                        </div>
+                    </div>
+
+                    <div class="glass-card gantt-board-card">
+                        <div class="gantt-grid-wrapper" id="gantt-wrapper">
+                            <!-- Populated dynamically by app.js -->
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- TAB 4: Resources & Fleets -->
+            <section class="tab-pane" id="tab-resources">
+                <div class="resources-view-layout">
+                    
+                    <div class="glass-card section-intro-card">
+                        <div class="header-icon"><i data-lucide="plane"></i></div>
+                        <div>
+                            <h3>Fleet Aircraft & Training Resource Compatibility Matrix</h3>
+                            <p class="text-muted">Decoupled junction mapping supporting multi-variant simulators (CEO/NEO/MAX) and independent regulatory approvals (DGCA/EASA)</p>
+                        </div>
+                    </div>
+
+                    <div class="fleet-resources-grid">
+                        
+                        <!-- Resources / Simulators List -->
+                        <div class="glass-card">
+                            <div class="card-header">
+                                <div class="header-icon"><i data-lucide="cpu"></i></div>
+                                <div>
+                                    <h3>Flight Simulation Training Devices (FSTD)</h3>
+                                    <p class="text-muted">FFS Level-D, FTD Level-2 and Classrooms</p>
+                                </div>
+                            </div>
+                            <div class="resources-table-container">
+                                <table class="data-table" id="table-resources">
+                                    <thead>
+                                        <tr>
+                                            <th>Resource</th>
+                                            <th>Category</th>
+                                            <th>Supported Aircraft</th>
+                                            <th>Regulatory Approval</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbody-resources"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Aircraft Types List -->
+                        <div class="glass-card">
+                            <div class="card-header">
+                                <div class="header-icon"><i data-lucide="plane"></i></div>
+                                <div>
+                                    <h3>Aircraft Types Master Data</h3>
+                                    <p class="text-muted">Master fleet definitions</p>
+                                </div>
+                            </div>
+                            <div class="resources-table-container">
+                                <table class="data-table" id="table-aircraft">
+                                    <thead>
+                                        <tr>
+                                            <th>Manufacturer</th>
+                                            <th>Model</th>
+                                            <th>Variant</th>
+                                            <th>Rating Code</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbody-aircraft"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 5: Qualification Matrix -->
+            <section class="tab-pane" id="tab-qualifications">
+                <div class="qual-matrix-layout">
+                    <div class="glass-card">
+                        <div class="card-header">
+                            <div class="header-icon"><i data-lucide="award"></i></div>
+                            <div>
+                                <h3>Full Instructor Qualification & Recurrent Matrix</h3>
+                                <p class="text-muted">Authorisations, Base Months, Expiry Dates and 3-Month Renewal Windows</p>
+                            </div>
+                        </div>
+                        <div class="resources-table-container">
+                            <table class="data-table" id="table-full-qual-matrix">
+                                <thead>
+                                    <tr>
+                                        <th>Instructor</th>
+                                        <th>Role(s)</th>
+                                        <th>Aircraft Type</th>
+                                        <th>Approval Number</th>
+                                        <th>Expiry Date</th>
+                                        <th>Recurrent Window</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-qual-matrix"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 6: Schema Explorer -->
+            <section class="tab-pane" id="tab-schema">
+                <div class="schema-view-layout">
+                    <div class="glass-card">
+                        <div class="card-header">
+                            <div class="header-icon"><i data-lucide="database"></i></div>
+                            <div>
+                                <h3>Foundational PostgreSQL & Supabase Architecture</h3>
+                                <p class="text-muted">Relational structure, exclusion constraints, FDTL procedures & RLS policies</p>
+                            </div>
+                            <div class="header-actions">
+                                <a href="DATABASE_SCHEMA.md" class="btn btn-secondary btn-sm" target="_blank">
+                                    <i data-lucide="file-text"></i> View DATABASE_SCHEMA.md
+                                </a>
+                                <a href="schema.sql" class="btn btn-primary btn-sm" download>
+                                    <i data-lucide="download"></i> Download schema.sql
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="schema-code-viewer">
+                            <pre><code class="language-sql" id="schema-code-block">-- 20 Key Relational Tables Loaded:
+-- 1. organisations
+-- 2. aircraft_types
+-- 3. resources
+-- 4. resource_aircraft_types (Junction)
+-- 5. resource_approvals (DGCA / EASA)
+-- 6. staff
+-- 7. staff_roles (Many-to-Many SFI/SFE/GI)
+-- 8. qualification_types
+-- 9. instructor_qualifications
+-- 10. instructor_recurrent_training
+-- 11. instructor_availability
+-- 12. students
+-- 13. student_cohorts
+-- 14. cohort_members
+-- 15. courses
+-- 16. course_lessons
+-- 17. student_courses
+-- 18. training_events
+-- 19. master_schedule (GiST Exclusion Constraints)
+-- 20. fdtl_records & fdtl_rules</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Notification Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

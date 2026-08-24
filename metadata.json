@@ -1,7 +1,0 @@
-{
-  "name": "AVI Training Module Platform",
-  "description": "A comprehensive flight simulator training management platform for engineers, instructors, and operations managers.",
-  "requestFramePermissions": [
-    "camera"
-  ]
-}
