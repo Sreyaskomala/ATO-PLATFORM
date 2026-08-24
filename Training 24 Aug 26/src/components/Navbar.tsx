@@ -2,10 +2,10 @@
 
 import React from 'react';
 import { useStore } from '@/store/useStore';
-import { Layers, ShieldCheck, Users, PlusCircle, GraduationCap } from 'lucide-react';
+import { Layers, ShieldCheck, Users, PlusCircle, GraduationCap, Download, Printer } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
-  const { organisation, fleets, simulators, instructors, batches, setActiveTab } = useStore();
+  const { organisation, fleets, simulators, instructors, batches, setActiveTab, setIsExportPrintModalOpen } = useStore();
 
   const activeSims = simulators.filter((s) => s.resource_category === 'FFS' && s.status === 'AVAILABLE').length;
 
@@ -27,7 +27,7 @@ export const Navbar: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-4">
         {/* Quick HUD Metrics */}
         <div className="hidden lg:flex items-center gap-6 border-r border-aviation-800 pr-6">
           <div className="flex items-center gap-2">
@@ -56,18 +56,28 @@ export const Navbar: React.FC = () => {
             </div>
             <div>
               <div className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">Instructors</div>
-              <div className="text-xs font-semibold text-white font-mono">{instructors.length} GI/SFI/SFE</div>
+              <div className="text-xs font-semibold text-white font-mono">{instructors.length} Active</div>
             </div>
           </div>
         </div>
 
+        {/* Export / Print Button */}
+        <button
+          onClick={() => setIsExportPrintModalOpen(true)}
+          className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-aviation-950 hover:bg-aviation-800 border border-aviation-800 hover:border-slate-600 text-slate-200 text-xs font-semibold transition-all shadow-sm"
+          title="Export CSV / Print PDF reports"
+        >
+          <Printer className="w-4 h-4 text-slate-400" />
+          <span>Export / Print</span>
+        </button>
+
         {/* Action Button */}
         <button
           onClick={() => setActiveTab('scheduler')}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-skyline-500 to-indigo-600 hover:from-skyline-400 hover:to-indigo-500 text-white font-semibold text-sm shadow-lg shadow-skyline-500/20 transition-all active:scale-95"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-skyline-500 to-indigo-600 hover:from-skyline-400 hover:to-indigo-500 text-white font-semibold text-xs shadow-lg shadow-skyline-500/20 transition-all active:scale-95"
         >
           <PlusCircle className="w-4 h-4" />
-          <span>Operational Scheduler</span>
+          <span>Dispatch Session</span>
         </button>
       </div>
     </header>

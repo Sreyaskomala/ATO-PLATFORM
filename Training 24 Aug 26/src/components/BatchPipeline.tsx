@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 
 export const BatchPipeline: React.FC = () => {
-  const { batches, students, setSelectedBatchId, setActiveTab } = useStore();
+  const { batches, students, setSelectedBatchId, setActiveTab, setIsCreateBatchModalOpen } = useStore();
 
   const handleScheduleForBatch = (batchId: string) => {
     setSelectedBatchId(batchId);
@@ -25,23 +25,31 @@ export const BatchPipeline: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fadeIn">
       {/* Top Banner */}
-      <div className="p-6 rounded-2xl bg-aviation-900/80 border border-aviation-800 backdrop-blur-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="p-6 rounded-3xl bg-aviation-900/80 border border-aviation-800/80 backdrop-blur-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
             <GraduationCap className="w-6 h-6 text-skyline-400" />
-            <h2 className="font-heading font-bold text-2xl text-white">Batch Training Progression Pipeline</h2>
+            <h2 className="font-heading font-extrabold text-2xl text-white">Batch Training Progression Pipeline</h2>
           </div>
           <p className="text-xs text-slate-400 mt-1">
             End-to-end type rating lifecycle: Technical & Performance Ground Classes (GIs) → Simulator FTD & FFS Training (SFIs) → CA-40 Skill Test (SFEs)
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="px-3 py-1 rounded-xl bg-aviation-950 border border-aviation-750 font-mono text-xs text-slate-300">
+        <div className="flex items-center gap-3">
+          <span className="px-3 py-2 rounded-xl bg-aviation-950 border border-aviation-750 font-mono text-xs text-slate-300">
             {batches.length} Active Batches
           </span>
+
+          <button
+            onClick={() => setIsCreateBatchModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-skyline-500 to-indigo-600 hover:from-skyline-400 hover:to-indigo-500 text-white text-xs font-semibold shadow-glow-cyan transition-all"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Create New Batch</span>
+          </button>
         </div>
       </div>
 

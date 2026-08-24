@@ -11,6 +11,9 @@ import { FlightScheduler } from '@/components/FlightScheduler';
 import { InstructorLegalityMatrix } from '@/components/InstructorLegalityMatrix';
 import { FleetResources } from '@/components/FleetResources';
 import { SchemaExplorer } from '@/components/SchemaExplorer';
+import { AddInstructorModal } from '@/components/AddInstructorModal';
+import { CreateBatchModal } from '@/components/CreateBatchModal';
+import { ExportPrintModal } from '@/components/ExportPrintModal';
 
 export default function Home() {
   const { activeTab } = useStore();
@@ -36,6 +39,11 @@ export default function Home() {
           </div>
         </main>
       </div>
+
+      {/* Global Action Modals */}
+      <AddInstructorModal />
+      <CreateBatchModal />
+      <ExportPrintModal />
     </div>
   );
 }

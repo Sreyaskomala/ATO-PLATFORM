@@ -78,6 +78,8 @@ export interface CadetStudent {
   batch_id: string;
   batch_code: string;
   airline: string;
+  medical_class1_expiry?: string;
+  contact_email?: string;
   ground_tech_completed: boolean;
   ground_perf_completed: boolean;
   sim_hours_completed: number;
@@ -95,10 +97,15 @@ export interface InstructorProfile {
   assigned_fleets: string[]; // e.g. ['A320', 'B737', 'ATR 72-600', 'Q400']
   dgca_approval_number: string;
   dgca_approval_type: string; // 'GI CAR', 'SME CAR', 'SFI CAR', 'SFE CAR'
-  base_month: string; // e.g. 'June 2026'
-  recurrent_expiry: string; // e.g. '2027-06-30'
-  recurrent_window_start: string; // e.g. '2027-04-01' (3 months prior)
+  dgca_5yr_approval_issue?: string; // DGCA 5-year initial approval issue date
+  dgca_5yr_approval_expiry?: string; // DGCA 5-year approval validity
+  base_month: string; // e.g. 'November'
+  recurrent_expiry: string; // e.g. '2026-11-30' (Annual recurrent check)
+  recurrent_window_start: string; // e.g. '2026-09-01' (3 months prior)
   recurrent_status: QualificationStatus;
+  last_flown_date?: string; // 90-day recency/currency check
+  currency_status?: QualificationStatus;
+  employment_status: 'ACTIVE' | 'ON_LEAVE' | 'RESIGNED';
   is_locked_out: boolean;
   lockout_reason?: string;
   avatar_initials: string;

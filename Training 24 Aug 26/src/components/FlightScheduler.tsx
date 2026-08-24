@@ -184,7 +184,11 @@ export const FlightScheduler: React.FC = () => {
               </label>
               <select
                 value={form.batchId}
-                onChange={(e) => updateForm({ batchId: e.target.value })}
+                onChange={(e) => {
+                  const bId = e.target.value;
+                  updateForm({ batchId: bId });
+                  useStore.getState().autoMatchInstructorAndResource(bId, form.syllabusCode);
+                }}
                 className="w-full px-3.5 py-2.5 rounded-xl bg-aviation-950 border border-aviation-750 text-slate-200 text-sm focus:border-skyline-500 focus:outline-none"
               >
                 {batches.map((b) => (
@@ -197,12 +201,26 @@ export const FlightScheduler: React.FC = () => {
 
             {/* Syllabus Item */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-                <Play className="w-3.5 h-3.5 text-indigo-400" /> Syllabus Training Session
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                  <Play className="w-3.5 h-3.5 text-indigo-400" /> Syllabus Training Session
+                </label>
+                <button
+                  type="button"
+                  onClick={() => useStore.getState().autoMatchInstructorAndResource(form.batchId, form.syllabusCode)}
+                  className="text-[10px] font-mono text-skyline-400 hover:text-skyline-300 flex items-center gap-1 font-bold"
+                >
+                  <Sparkles className="w-3 h-3" />
+                  <span>Auto-Match Instructor & Bay</span>
+                </button>
+              </div>
               <select
                 value={form.syllabusCode}
-                onChange={(e) => updateForm({ syllabusCode: e.target.value })}
+                onChange={(e) => {
+                  const sCode = e.target.value;
+                  updateForm({ syllabusCode: sCode });
+                  useStore.getState().autoMatchInstructorAndResource(form.batchId, sCode);
+                }}
                 className="w-full px-3.5 py-2.5 rounded-xl bg-aviation-950 border border-aviation-750 text-slate-200 text-sm focus:border-skyline-500 focus:outline-none"
               >
                 {syllabus.map((s) => (
@@ -235,17 +253,22 @@ export const FlightScheduler: React.FC = () => {
 
             {/* Assigned Instructor */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5 text-skyline-400" /> Assigned Instructor
+              <label className="text-xs font-semibold text-slate-300 flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <User className="w-3.5 h-3.5 text-skyline-400" /> Assigned Instructor
+                </span>
+                <span className="text-[10px] font-mono text-emerald-400">
+                  Auto-Matched for {selectedSyllabus.required_instructor_role}
+                </span>
               </label>
               <select
                 value={form.instructorId}
                 onChange={(e) => updateForm({ instructorId: e.target.value })}
                 className="w-full px-3.5 py-2.5 rounded-xl bg-aviation-950 border border-aviation-750 text-slate-200 text-sm focus:border-skyline-500 focus:outline-none"
               >
-                {instructors.map((ins) => (
+                {instructors.filter(ins => ins.employment_status !== 'RESIGNED').map((ins) => (
                   <option key={ins.id} value={ins.id}>
-                    {ins.full_name} ({ins.roles.join(', ')} • {ins.staff_id})
+                    {ins.full_name} ({ins.roles.join(', ')} • {ins.staff_id} • Fleets: {ins.assigned_fleets.join('/')})
                   </option>
                 ))}
               </select>

@@ -91,11 +91,27 @@ export const DashboardView: React.FC = () => {
 
           <div className="flex flex-wrap items-center gap-3">
             <button
-              onClick={handleGoToCalendarDay}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-aviation-800 hover:bg-aviation-700 text-slate-200 text-xs font-semibold border border-aviation-700 transition-all shadow-sm hover:text-white"
+              onClick={() => useStore.getState().setIsAddInstructorModalOpen(true)}
+              className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-aviation-800 hover:bg-aviation-700 text-slate-200 text-xs font-semibold border border-aviation-700 transition-all shadow-sm hover:text-white"
             >
-              <Calendar className="w-4 h-4 text-skyline-400" />
-              <span>Open Master Calendar</span>
+              <UserCheck className="w-4 h-4 text-skyline-400" />
+              <span>+ Onboard Instructor</span>
+            </button>
+
+            <button
+              onClick={() => useStore.getState().setIsCreateBatchModalOpen(true)}
+              className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-aviation-800 hover:bg-aviation-700 text-slate-200 text-xs font-semibold border border-aviation-700 transition-all shadow-sm hover:text-white"
+            >
+              <GraduationCap className="w-4 h-4 text-indigo-400" />
+              <span>+ New Batch</span>
+            </button>
+
+            <button
+              onClick={handleGoToCalendarDay}
+              className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-aviation-800 hover:bg-aviation-700 text-slate-200 text-xs font-semibold border border-aviation-700 transition-all shadow-sm hover:text-white"
+            >
+              <Calendar className="w-4 h-4 text-emerald-400" />
+              <span>Master Calendar</span>
             </button>
 
             <button
@@ -103,7 +119,7 @@ export const DashboardView: React.FC = () => {
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-skyline-500 to-indigo-600 hover:from-skyline-400 hover:to-indigo-500 text-white text-xs font-semibold shadow-glow-cyan transition-all"
             >
               <Plus className="w-4 h-4" />
-              <span>Schedule Session</span>
+              <span>Dispatch Session</span>
             </button>
           </div>
         </div>

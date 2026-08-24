@@ -86,8 +86,29 @@ interface ATOStore {
   selectedBatchId: string;
   setSelectedBatchId: (id: string) => void;
 
+  // Modals state
+  isCreateBatchModalOpen: boolean;
+  setIsCreateBatchModalOpen: (open: boolean) => void;
+  isAddInstructorModalOpen: boolean;
+  setIsAddInstructorModalOpen: (open: boolean) => void;
+  isExportPrintModalOpen: boolean;
+  setIsExportPrintModalOpen: (open: boolean) => void;
+
+  // Dynamic CRUD
+  addInstructor: (instructor: Omit<InstructorProfile, 'id' | 'avatar_initials' | 'is_locked_out'>) => void;
+  updateInstructorStatus: (id: string, status: 'ACTIVE' | 'ON_LEAVE' | 'RESIGNED') => void;
+  addBatch: (
+    batch: Omit<TrainingBatch, 'id' | 'students_count' | 'progress_percentage'>,
+    cadets: { full_name: string; student_number: string; airline: string; medical_class1_expiry?: string; contact_email?: string }[]
+  ) => void;
+  addStudentToBatch: (
+    batchId: string,
+    student: { full_name: string; student_number: string; airline: string; medical_class1_expiry?: string; contact_email?: string }
+  ) => void;
+
   form: SchedulingFormState;
   updateForm: (updates: Partial<SchedulingFormState>) => void;
+  autoMatchInstructorAndResource: (batchId: string, syllabusCode: string) => void;
   applyPreset: (presetKey: 'valid-ground-tech' | 'valid-ground-perf' | 'valid-sfi-ffs' | 'blocked-prereq-sim' | 'fdtl-exceeded' | 'refresher-lockout' | 'sim-fleet-mismatch') => void;
 
   validation: {
@@ -119,6 +140,13 @@ export const useStore = create<ATOStore>((set, get) => ({
   calendarResourceFilter: 'ALL',
   setCalendarResourceFilter: (resourceId) => set({ calendarResourceFilter: resourceId }),
 
+  isCreateBatchModalOpen: false,
+  setIsCreateBatchModalOpen: (open) => set({ isCreateBatchModalOpen: open }),
+  isAddInstructorModalOpen: false,
+  setIsAddInstructorModalOpen: (open) => set({ isAddInstructorModalOpen: open }),
+  isExportPrintModalOpen: false,
+  setIsExportPrintModalOpen: (open) => set({ isExportPrintModalOpen: open }),
+
   organisation: ATO_ORGANISATION,
   fleets: ATO_FLEETS,
   batches: ATO_BATCHES,
@@ -134,6 +162,156 @@ export const useStore = create<ATOStore>((set, get) => ({
 
   selectedBatchId: ATO_BATCHES[0].id, // Batch 26A (IndiGo A320)
   setSelectedBatchId: (id) => set({ selectedBatchId: id }),
+
+  addInstructor: (newIns) => {
+    const initials = newIns.full_name
+      .replace(/^Capt\.\s+/i, '')
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+
+    const created: InstructorProfile = {
+      ...newIns,
+      id: `ins-${Date.now()}`,
+      avatar_initials: initials || 'IN',
+      is_locked_out: newIns.recurrent_status === 'REFRESHER_REQUIRED' || newIns.recurrent_status === 'EXPIRED',
+    };
+
+    set((state) => ({
+      instructors: [created, ...state.instructors],
+    }));
+
+    get().addToast({
+      type: 'success',
+      title: 'Instructor Onboarded',
+      message: `${created.full_name} (${created.dgca_approval_number}) successfully registered with 5-year DGCA CAR validity.`,
+    });
+  },
+
+  updateInstructorStatus: (id, status) => {
+    set((state) => ({
+      instructors: state.instructors.map((ins) =>
+        ins.id === id ? { ...ins, employment_status: status } : ins
+      ),
+    }));
+
+    get().addToast({
+      type: 'info',
+      title: 'Instructor Status Updated',
+      message: `Employment status changed to ${status}.`,
+    });
+  },
+
+  addBatch: (batchData, cadetsData) => {
+    const batchId = `batch-${Date.now()}`;
+    const newBatch: TrainingBatch = {
+      ...batchData,
+      id: batchId,
+      students_count: cadetsData.length,
+      progress_percentage: 0,
+    };
+
+    const newCadets: CadetStudent[] = cadetsData.map((c, i) => ({
+      id: `stu-${Date.now()}-${i}`,
+      student_number: c.student_number,
+      full_name: c.full_name,
+      batch_id: batchId,
+      batch_code: batchData.batch_code,
+      airline: c.airline || batchData.airline_operator,
+      medical_class1_expiry: c.medical_class1_expiry || '2027-08-31',
+      contact_email: c.contact_email,
+      ground_tech_completed: false,
+      ground_perf_completed: false,
+      sim_hours_completed: 0,
+      skill_test_cleared: false,
+      status: 'IN_TRAINING',
+    }));
+
+    set((state) => ({
+      batches: [newBatch, ...state.batches],
+      students: [...state.students, ...newCadets],
+    }));
+
+    get().addToast({
+      type: 'success',
+      title: 'Training Batch Created',
+      message: `${newBatch.batch_name} (${newBatch.batch_code}) registered with ${newCadets.length} enrolled cadets.`,
+    });
+  },
+
+  addStudentToBatch: (batchId, cadet) => {
+    const batch = get().batches.find((b) => b.id === batchId);
+    if (!batch) return;
+
+    const newCadet: CadetStudent = {
+      id: `stu-${Date.now()}`,
+      student_number: cadet.student_number,
+      full_name: cadet.full_name,
+      batch_id: batchId,
+      batch_code: batch.batch_code,
+      airline: cadet.airline || batch.airline_operator,
+      medical_class1_expiry: cadet.medical_class1_expiry || '2027-08-31',
+      contact_email: cadet.contact_email,
+      ground_tech_completed: false,
+      ground_perf_completed: false,
+      sim_hours_completed: 0,
+      skill_test_cleared: false,
+      status: 'IN_TRAINING',
+    };
+
+    set((state) => ({
+      students: [...state.students, newCadet],
+      batches: state.batches.map((b) =>
+        b.id === batchId ? { ...b, students_count: b.students_count + 1 } : b
+      ),
+    }));
+
+    get().addToast({
+      type: 'success',
+      title: 'Cadet Enrolled',
+      message: `${newCadet.full_name} enrolled into batch ${batch.batch_code}.`,
+    });
+  },
+
+  autoMatchInstructorAndResource: (batchId, syllabusCode) => {
+    const { batches, syllabus, instructors, simulators, students, form } = get();
+    const batch = batches.find((b) => b.id === batchId) || batches[0];
+    const syllabusItem = syllabus.find((s) => s.session_code === syllabusCode) || syllabus[0];
+
+    // 1. Match compliant instructor
+    const compliantInstructor = instructors.find((ins) => {
+      if (ins.employment_status === 'RESIGNED') return false;
+      const hasRole = ins.roles.includes(syllabusItem.required_instructor_role);
+      const hasFleet = ins.assigned_fleets.some((f) => batch.aircraft_type_name.includes(f));
+      return hasRole && hasFleet && !ins.is_locked_out;
+    }) || instructors[0];
+
+    // 2. Match compliant simulator resource
+    const compliantResource = simulators.find((res) => {
+      const isCompatCategory = res.resource_category === syllabusItem.required_resource_category;
+      const isCompatFleet = res.supported_aircraft_ids.includes(batch.aircraft_type_id);
+      return isCompatCategory && isCompatFleet && res.status === 'AVAILABLE';
+    }) || simulators[0];
+
+    // 3. Match cadets belonging to this batch
+    const batchCadetIds = students.filter((s) => s.batch_id === batch.id).map((s) => s.id);
+    const selectedCadets = batchCadetIds.length > 0 ? batchCadetIds.slice(0, 2) : form.selectedStudentIds;
+
+    set((state) => ({
+      form: {
+        ...state.form,
+        batchId: batch.id,
+        syllabusCode: syllabusItem.session_code,
+        instructorId: compliantInstructor.id,
+        resourceId: compliantResource.id,
+        selectedStudentIds: selectedCadets,
+      },
+    }));
+
+    get().runValidation();
+  },
 
   form: {
     batchId: ATO_BATCHES[0].id,
