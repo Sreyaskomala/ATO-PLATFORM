@@ -3,17 +3,28 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 255, 255, 255;
+  --foreground-rgb: 15, 23, 42;
+  --background-start-rgb: 248, 250, 252;
+  --background-end-rgb: 241, 245, 249;
+}
+
+.dark {
+  --foreground-rgb: 248, 250, 252;
   --background-start-rgb: 11, 15, 25;
   --background-end-rgb: 7, 11, 20;
 }
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: radial-gradient(circle at 50% 0%, #151d33 0%, #0b0f19 50%, #070b14 100%);
+  background-color: #f8fafc;
   min-height: 100vh;
   font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+.dark body {
+  background: radial-gradient(circle at 50% 0%, #151d33 0%, #0b0f19 50%, #070b14 100%);
+  background-color: #070b14;
 }
 
 /* Custom Scrollbars */
@@ -23,20 +34,39 @@ body {
 }
 
 ::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.dark ::-webkit-scrollbar-track {
   background: #0b0f19;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1c2642;
+  background: #cbd5e1;
   border-radius: 9999px;
 }
 
+.dark ::-webkit-scrollbar-thumb {
+  background: #1c2642;
+}
+
 ::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
   background: #334575;
 }
 
 /* Glassmorphism helpers */
 .glass-panel {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.dark .glass-panel {
   background: rgba(16, 22, 38, 0.7);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);

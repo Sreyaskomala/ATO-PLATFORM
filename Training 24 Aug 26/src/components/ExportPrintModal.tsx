@@ -142,11 +142,11 @@ export const ExportPrintModal: React.FC = () => {
         s.student_number,
         s.full_name,
         s.batch_code,
-        s.airline,
+        s.airline_sponsor || s.airline || 'N/A',
         s.medical_class1_expiry || '2027-08-31',
         s.ground_tech_completed ? 'YES' : 'NO',
         s.ground_perf_completed ? 'YES' : 'NO',
-        s.sim_hours_completed,
+        s.sim_ffs_hours_completed ?? s.sim_hours_completed ?? 0,
         s.skill_test_cleared ? 'YES' : 'NO',
         s.status,
       ]);
@@ -158,19 +158,19 @@ export const ExportPrintModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="w-full max-w-xl bg-aviation-950 border border-aviation-800 rounded-3xl p-6 shadow-2xl space-y-6 animate-fadeIn">
+    <div className="fixed inset-0 z-50 bg-slate-900/60 dark:bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+      <div className="w-full max-w-xl bg-white dark:bg-aviation-950 border border-slate-200 dark:border-aviation-800 rounded-3xl p-6 shadow-2xl space-y-6 animate-fadeIn transition-colors duration-150">
         {/* Header */}
-        <div className="flex items-start justify-between border-b border-aviation-800 pb-4">
+        <div className="flex items-start justify-between border-b border-slate-200 dark:border-aviation-800 pb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-skyline-600 flex items-center justify-center text-white shadow-glow-cyan">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-skyline-600 flex items-center justify-center text-white shadow-md shadow-skyline-500/20 dark:shadow-glow-cyan">
               <Download className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-xl font-heading font-extrabold text-white">
+              <h2 className="text-xl font-heading font-extrabold text-slate-900 dark:text-white">
                 Export Data & Print Audit Documents
               </h2>
-              <p className="text-xs text-slate-400 font-mono mt-0.5">
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">
                 Generate Excel / CSV spreadsheets or print formatted DGCA compliance reports
               </p>
             </div>
@@ -179,7 +179,7 @@ export const ExportPrintModal: React.FC = () => {
           <button
             onClick={() => setIsExportPrintModalOpen(false)}
             aria-label="Close export and print modal"
-            className="p-2 rounded-xl bg-aviation-900 border border-aviation-800 text-slate-400 hover:text-white"
+            className="p-2 rounded-xl bg-slate-100 dark:bg-aviation-900 border border-slate-200 dark:border-aviation-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
           >
             <X className="w-5 h-5" />
           </button>
@@ -187,7 +187,7 @@ export const ExportPrintModal: React.FC = () => {
 
         {/* Format Selection Grid */}
         <div className="space-y-3">
-          <label className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">
+          <label className="text-xs font-mono font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
             Select Export Package / Document
           </label>
 
@@ -197,35 +197,35 @@ export const ExportPrintModal: React.FC = () => {
                 id: 'EXCEL_SCHEDULE',
                 title: 'Master Simulator & Flight Schedule (Excel / CSV)',
                 desc: 'Complete roster across all simulator bays, aircraft types, instructors, and cadets.',
-                icon: <FileSpreadsheet className="w-5 h-5 text-emerald-400" />,
+                icon: <FileSpreadsheet className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />,
                 badge: 'CSV / Excel',
               },
               {
                 id: 'EXCEL_INSTRUCTORS',
                 title: 'DGCA Instructor Legality & Recurrent Matrix (Excel)',
                 desc: 'Staff IDs, 5-year approvals, base month grace windows, and recurrent expiry records.',
-                icon: <UserCheck className="w-5 h-5 text-skyline-400" />,
+                icon: <UserCheck className="w-5 h-5 text-skyline-500 dark:text-skyline-400" />,
                 badge: 'Audit Ready',
               },
               {
                 id: 'EXCEL_CADETS',
                 title: 'Cadet Cohort & CBTA Progression Report (Excel)',
                 desc: 'Enrolled students, airline sponsors, medical Class 1 validity, and syllabus hours.',
-                icon: <FileSpreadsheet className="w-5 h-5 text-indigo-400" />,
+                icon: <FileSpreadsheet className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />,
                 badge: 'Syllabus Log',
               },
               {
                 id: 'PRINT_DISPATCH',
                 title: 'Print Formatted Daily Simulator Operations Sheet (PDF / Print)',
                 desc: 'Print-ready dispatch document with official DGCA ATO header and sign-off blocks.',
-                icon: <Printer className="w-5 h-5 text-amber-400" />,
+                icon: <Printer className="w-5 h-5 text-amber-500 dark:text-amber-400" />,
                 badge: 'Print / PDF',
               },
               {
                 id: 'PRINT_FDTL_AUDIT',
                 title: 'Print DGCA CAR Section 7 FDTL Compliance Certificate',
                 desc: 'Certified instructor duty limitation records for DGCA regulatory audit inspection.',
-                icon: <FileText className="w-5 h-5 text-rose-400" />,
+                icon: <FileText className="w-5 h-5 text-rose-500 dark:text-rose-400" />,
                 badge: 'Regulatory',
               },
             ].map((fmt) => (
@@ -234,30 +234,30 @@ export const ExportPrintModal: React.FC = () => {
                 onClick={() => setSelectedFormat(fmt.id as any)}
                 className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-4 ${
                   selectedFormat === fmt.id
-                    ? 'bg-skyline-500/15 border-skyline-500/60 shadow-glow-cyan'
-                    : 'bg-aviation-900/50 border-aviation-800/80 hover:border-aviation-700'
+                    ? 'bg-skyline-50 dark:bg-skyline-500/15 border-skyline-400 dark:border-skyline-500/60 shadow-sm dark:shadow-glow-cyan'
+                    : 'bg-slate-50/70 dark:bg-aviation-900/50 border-slate-200 dark:border-aviation-800/80 hover:border-slate-300 dark:hover:border-aviation-700'
                 }`}
               >
                 <div className="flex items-start gap-3.5">
-                  <div className="p-2 rounded-xl bg-aviation-950 border border-aviation-800 shrink-0">
+                  <div className="p-2 rounded-xl bg-white dark:bg-aviation-950 border border-slate-200 dark:border-aviation-800 shrink-0">
                     {fmt.icon}
                   </div>
                   <div>
-                    <div className="text-xs font-bold text-white flex items-center gap-2">
+                    <div className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-2">
                       <span>{fmt.title}</span>
-                      <span className="px-2 py-0.5 text-[9px] font-mono font-semibold rounded bg-aviation-950 text-slate-300 border border-aviation-800">
+                      <span className="px-2 py-0.5 text-[9px] font-mono font-semibold rounded bg-slate-100 dark:bg-aviation-950 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-aviation-800">
                         {fmt.badge}
                       </span>
                     </div>
-                    <p className="text-[11px] text-slate-400 mt-0.5">{fmt.desc}</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{fmt.desc}</p>
                   </div>
                 </div>
 
                 <div
                   className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${
                     selectedFormat === fmt.id
-                      ? 'border-skyline-400 bg-skyline-500 text-white'
-                      : 'border-aviation-700'
+                      ? 'border-skyline-500 bg-skyline-500 text-white'
+                      : 'border-slate-300 dark:border-aviation-700'
                   }`}
                 >
                   {selectedFormat === fmt.id && <div className="w-2 h-2 rounded-full bg-white"></div>}
@@ -268,21 +268,21 @@ export const ExportPrintModal: React.FC = () => {
         </div>
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-between pt-4 border-t border-aviation-800">
-          <div className="text-[11px] font-mono text-slate-400">
+        <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-aviation-800">
+          <div className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
             Tenant: {organisation.legal_name}
           </div>
 
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsExportPrintModalOpen(false)}
-              className="px-4 py-2.5 rounded-xl bg-aviation-900 hover:bg-aviation-800 text-slate-300 text-xs font-semibold"
+              className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-aviation-900 dark:hover:bg-aviation-800 text-slate-700 dark:text-slate-300 text-xs font-semibold transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleExecuteExport}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-skyline-600 hover:from-emerald-400 hover:to-skyline-500 text-white text-xs font-semibold shadow-glow-cyan transition-all"
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-skyline-600 hover:from-emerald-400 hover:to-skyline-500 text-white text-xs font-semibold shadow-md shadow-skyline-500/20 dark:shadow-glow-cyan transition-all"
             >
               {selectedFormat.startsWith('PRINT') ? (
                 <>

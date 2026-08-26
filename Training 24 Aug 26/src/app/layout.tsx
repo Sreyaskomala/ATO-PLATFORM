@@ -33,8 +33,28 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className={`${inter.variable} ${outfit.variable} ${jetbrainsMono.variable} font-sans bg-aviation-950 text-slate-100 min-h-screen antialiased`}>
+    <html lang="en" className="light" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                const saved = localStorage.getItem('aeromatrix_theme');
+                if (saved === 'dark') {
+                  document.documentElement.classList.add('dark');
+                  document.documentElement.classList.remove('light');
+                  document.documentElement.setAttribute('data-theme', 'dark');
+                } else {
+                  document.documentElement.classList.remove('dark');
+                  document.documentElement.classList.add('light');
+                  document.documentElement.setAttribute('data-theme', 'light');
+                }
+              } catch (e) {}
+            `,
+          }}
+        />
+      </head>
+      <body className={`${inter.variable} ${outfit.variable} ${jetbrainsMono.variable} font-sans bg-slate-50 dark:bg-aviation-950 text-slate-900 dark:text-slate-100 min-h-screen antialiased transition-colors duration-150`}>
         {children}
         <ToastContainer />
       </body>
