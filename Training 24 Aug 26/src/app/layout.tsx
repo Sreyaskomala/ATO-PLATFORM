@@ -22,7 +22,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'AeroMatrix ATO — Flight Training Operations & DGCA FDTL Compliance Platform',
+  title: 'ATO Platform — Flight Training Operations & DGCA FDTL Compliance Platform',
   description:
     'Comprehensive operational scheduling, simulator resource allocation, instructor qualification tracking, and DGCA CAR FDTL compliance verification.',
 };

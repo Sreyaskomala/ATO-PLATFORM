@@ -96,7 +96,7 @@ export const Sidebar: React.FC = () => {
           </div>
           <div>
             <div className="font-heading font-extrabold text-base tracking-wider text-slate-900 dark:text-white">
-              AEROMATRIX<span className="text-skyline-500 dark:text-skyline-400">ATO</span>
+              ATO<span className="text-skyline-500 dark:text-skyline-400">PLATFORM</span>
             </div>
             <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400">Aviation Operations Platform</div>
           </div>

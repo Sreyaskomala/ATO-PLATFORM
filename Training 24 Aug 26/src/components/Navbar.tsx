@@ -52,7 +52,7 @@ export const Navbar: React.FC = () => {
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <h1 className="font-heading font-extrabold text-base sm:text-lg lg:text-xl text-slate-900 dark:text-white tracking-wide truncate">
-              AeroMatrix <span className="text-skyline-500 dark:text-skyline-400">ATO Platform</span>
+              ATO <span className="text-skyline-500 dark:text-skyline-400">Platform</span>
             </h1>
             <span className="hidden sm:inline-flex px-2 py-0.5 text-[9px] sm:text-[10px] font-mono font-bold tracking-wider uppercase rounded-full bg-skyline-50 dark:bg-skyline-500/10 border border-skyline-200 dark:border-skyline-500/30 text-skyline-700 dark:text-skyline-300 shrink-0">
               DGCA CAR-FSTD LEVEL D

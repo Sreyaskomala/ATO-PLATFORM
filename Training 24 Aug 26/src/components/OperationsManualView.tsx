@@ -246,7 +246,7 @@ export const OperationsManualView: React.FC = () => {
               <BookOpen className="w-5 h-5" />
             </div>
             <h1 className="font-heading font-extrabold text-2xl text-slate-900 dark:text-white">
-              AeroMatrix ATO Platform Manual & Regulatory Guide
+              ATO Platform Operations Manual & Regulatory Guide
             </h1>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed max-w-3xl">
