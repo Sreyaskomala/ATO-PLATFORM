@@ -154,7 +154,14 @@ export function validateATOSchedulingMatrix(params: {
 
   // 1. INSTRUCTOR ROLE & APPROVAL MATCH
   const hasRole = instructor.roles.includes(syllabusItem.required_instructor_role);
-  if (!hasRole) {
+  // Check if instructor has granular qualification matching fleet & role
+  const matchingQual = instructor.qualifications?.find((q) => {
+    const roleMatches = q.role === syllabusItem.required_instructor_role;
+    const fleetMatches = q.fleet_code === 'ALL_FLEETS' || batch.aircraft_type_name.includes(q.fleet_code);
+    return roleMatches && fleetMatches;
+  });
+
+  if (!hasRole && !matchingQual) {
     isValid = false;
     checks.push({
       id: 'chk-role-match',
@@ -169,12 +176,14 @@ export function validateATOSchedulingMatrix(params: {
       category: 'INSTRUCTOR',
       rule_title: '1. Instructor Qualification Category Match',
       passed: true,
-      message: `Verified: ${instructor.full_name} holds required ${syllabusItem.required_instructor_role} approval (${instructor.dgca_approval_number}).`,
+      message: `Verified: ${instructor.full_name} holds required ${syllabusItem.required_instructor_role} authorization (${matchingQual ? matchingQual.approval_number : instructor.dgca_approval_number}).`,
     });
   }
 
   // 2. FLEET APPROVAL ENDORSEMENT
-  const fleetMatches = instructor.assigned_fleets.some((f) => batch.aircraft_type_name.includes(f));
+  const fleetMatches = instructor.assigned_fleets.some((f) => batch.aircraft_type_name.includes(f)) ||
+    Boolean(matchingQual);
+
   if (!fleetMatches) {
     isValid = false;
     checks.push({
@@ -190,27 +199,28 @@ export function validateATOSchedulingMatrix(params: {
       category: 'INSTRUCTOR',
       rule_title: '2. Fleet Type Rating Endorsement',
       passed: true,
-      message: `Endorsement Valid: Instructor rated on ${batch.aircraft_type_name}.`,
+      message: `Endorsement Valid: Instructor rated on ${batch.aircraft_type_name}${matchingQual ? ` (${matchingQual.approval_type}, Valid: ${matchingQual.approval_expiry_date})` : ''}.`,
     });
   }
 
   // 3. RECURRENT TRS 1-YEAR VALIDITY & REFRESHER LOCKOUT
-  if (instructor.is_locked_out || instructor.recurrent_status === 'REFRESHER_REQUIRED') {
+  const isQualLocked = matchingQual && (matchingQual.status === 'REFRESHER_REQUIRED' || matchingQual.status === 'EXPIRED');
+  if (instructor.is_locked_out || instructor.recurrent_status === 'REFRESHER_REQUIRED' || isQualLocked) {
     isValid = false;
     checks.push({
       id: 'chk-recurrent-lockout',
       category: 'RECURRENT',
       rule_title: '3. Recurrent TRS Validity & Refresher Lockout',
       passed: false,
-      message: `OPERATIONAL LOCKOUT: 1-Year Recurrent check deadline passed on ${instructor.recurrent_expiry}. Refresher course mandatory before reinstatement.`,
+      message: `OPERATIONAL LOCKOUT: 1-Year Recurrent check deadline passed on ${matchingQual?.recurrent_expiry || instructor.recurrent_expiry}. Refresher course mandatory before reinstatement.`,
     });
-  } else if (instructor.recurrent_status === 'EXPIRING') {
+  } else if (instructor.recurrent_status === 'EXPIRING' || matchingQual?.status === 'EXPIRING') {
     checks.push({
       id: 'chk-recurrent-lockout',
       category: 'RECURRENT',
       rule_title: '3. Recurrent TRS Validity & Refresher Lockout',
       passed: true,
-      message: `Inside 3-Month Recurrent Window (${instructor.recurrent_window_start} – ${instructor.recurrent_expiry}). Base month preserved (${instructor.base_month}).`,
+      message: `Inside 3-Month Recurrent Window (${matchingQual?.recurrent_window_start || instructor.recurrent_window_start} – ${matchingQual?.recurrent_expiry || instructor.recurrent_expiry}). Base month preserved (${matchingQual?.base_month || instructor.base_month}).`,
     });
   } else {
     checks.push({
@@ -218,11 +228,23 @@ export function validateATOSchedulingMatrix(params: {
       category: 'RECURRENT',
       rule_title: '3. Recurrent TRS Validity & Refresher Lockout',
       passed: true,
-      message: `TRS 1-Year Recurrent Current: Base month ${instructor.base_month} valid until ${instructor.recurrent_expiry}.`,
+      message: `TRS 1-Year Recurrent Current: Base month ${matchingQual?.base_month || instructor.base_month} valid until ${matchingQual?.recurrent_expiry || instructor.recurrent_expiry}.`,
     });
   }
 
-  // 4. BATCH PROGRESSION & GATEKEEPER RULES
+  // 4. BATCH PROGRESSION & GATEKEEPER RULES (Ground School & Missed Classes)
+  const missedClassStudents = students.filter((s) => s.has_missed_sessions || s.go_no_go_status === 'NO_GO_BLOCKED');
+  if (missedClassStudents.length > 0 && (syllabusItem.phase === 'SIM_FFS' || syllabusItem.phase === 'SIM_FTD' || syllabusItem.phase === 'SKILL_TEST')) {
+    isValid = false;
+    checks.push({
+      id: 'chk-gatekeeper-missed',
+      category: 'PREREQUISITE',
+      rule_title: '4A. Cadet Attendance & Missed Session Gatekeeper',
+      passed: false,
+      message: `PREREQUISITE VIOLATION: ${missedClassStudents.map((s) => `${s.full_name} (${s.blocker_reason || 'Missed required class module'})`).join('; ')}. Makeup session mandatory before proceeding to simulator!`,
+    });
+  }
+
   if (syllabusItem.phase === 'SIM_FFS' || syllabusItem.phase === 'SIM_FTD') {
     const uncompletedGroundStudents = students.filter((s) => !s.ground_tech_completed || !s.ground_perf_completed);
     if (uncompletedGroundStudents.length > 0) {
@@ -230,7 +252,7 @@ export function validateATOSchedulingMatrix(params: {
       checks.push({
         id: 'chk-gatekeeper-ground',
         category: 'BATCH_PROGRESSION',
-        rule_title: '4. Batch Progression: Ground School Gatekeeper',
+        rule_title: '4B. Batch Progression: Ground School Gatekeeper',
         passed: false,
         message: `Prerequisite Violation: Cannot book Simulators. ${uncompletedGroundStudents.map((s) => s.full_name).join(', ')} have not completed Technical & Performance Ground School!`,
       });
@@ -238,13 +260,13 @@ export function validateATOSchedulingMatrix(params: {
       checks.push({
         id: 'chk-gatekeeper-ground',
         category: 'BATCH_PROGRESSION',
-        rule_title: '4. Batch Progression: Ground School Gatekeeper',
+        rule_title: '4B. Batch Progression: Ground School Gatekeeper',
         passed: true,
         message: 'Ground School Gate Passed: All assigned cadets cleared Technical & Performance phases.',
       });
     }
   } else if (syllabusItem.phase === 'SKILL_TEST') {
-    const unreadyCadets = students.filter((s) => s.sim_hours_completed < 16.0);
+    const unreadyCadets = students.filter((s) => (s.sim_ffs_hours_completed ?? s.sim_hours_completed ?? 0) < 16.0);
     if (unreadyCadets.length > 0) {
       isValid = false;
       checks.push({
@@ -379,12 +401,18 @@ export function validateATOSchedulingMatrix(params: {
     });
   }
 
+  const failedChecks = checks.filter((c) => !c.passed);
+  const failureSummary = failedChecks.length > 0
+    ? failedChecks.map((c) => c.message).join(' • ')
+    : 'Session violates DGCA compliance or prerequisite requirements.';
+
   return {
     isValid,
     summary: isValid
       ? 'All DGCA CAR and ATO Training Matrix rules satisfied. Session legal to schedule.'
-      : 'Session violates DGCA compliance or prerequisite requirements.',
+      : failureSummary,
     fdtl,
     checks,
   };
 }
+

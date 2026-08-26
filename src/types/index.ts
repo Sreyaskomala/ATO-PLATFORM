@@ -15,11 +15,14 @@ export type InstructorRole =
   | 'GI_TECH'    // Technical Ground Instructor (Systems, Airframe, Avionics, Hydraulics)
   | 'GI_PERF'    // Performance Ground Instructor / SME (Flight Planning, Performance, W&B, Weather)
   | 'SFI'        // Synthetic Flight Instructor (Simulator Training FFS/FTD)
-  | 'SFE';       // Synthetic Flight Examiner (Skill Tests, PPC, License Endorsements)
+  | 'SFE'        // Synthetic Flight Examiner (Skill Tests, PPC, License Endorsements)
+  | 'TRI'        // Type Rating Instructor
+  | 'TRE';       // Type Rating Examiner
 
 export type TrainingPhase = 
   | 'GROUND_TECH'    // Phase 1A: Technical Ground School
   | 'GROUND_PERF'    // Phase 1B: Performance & Flight Planning Ground School
+  | 'MCC_JIT'        // Phase 1C: Multi-Crew Cooperation & Jet Induction Training
   | 'SIM_FTD'        // Phase 2A: Flight Training Device Procedures
   | 'SIM_FFS'        // Phase 2B: Full Flight Simulator Sessions (FFS-01 to FFS-08)
   | 'SKILL_TEST';    // Phase 3: CA-40 Skill Test / License Endorsement Check
@@ -37,6 +40,20 @@ export type ScheduleStatus =
   | 'IN_PROGRESS'
   | 'COMPLETED'
   | 'CANCELLED';
+
+export type EvaluationResult = 
+  | 'PASSED'
+  | 'FAILED'
+  | 'REMEDIAL_REQUIRED'
+  | 'PENDING'
+  | 'NOT_STARTED';
+
+export type CourseAudience = 
+  | 'FRESHER_AB_INITIO'       // Fresher / CPL Holder (Requires full Ground + MCC/JIT + FTD + FFS)
+  | 'TYPE_RATED_TRANSITION'   // Existing Type Rating Holder (Transition Fast-Track without MCC/JIT)
+  | 'CAPTAIN_UPGRADE'         // Command Upgrade (PIC LHS Training)
+  | 'RECURRENT_REFRESHER'     // Annual Recurrent / Refresher
+  | 'SPECIAL_OPERATIONS';     // UPRT, LVO/AWO CAT II/III, PBN/RNAV
 
 export interface Organisation {
   id: string;
@@ -56,6 +73,43 @@ export interface AircraftFleet {
   description: string;
 }
 
+export type CadetGoNoGoStatus = 'GO_CLEARED' | 'NO_GO_BLOCKED' | 'REMEDIAL_ACTIVE';
+export type StageEvalOutcome = 'PASSED' | 'FAILED' | 'REMEDIAL_REQUIRED';
+
+export interface CourseStage {
+  stage_id: string;
+  stage_number: number;
+  stage_name: string;
+  stage_type: 'GROUND_THEORY' | 'MCC_JIT' | 'FTD_PROCEDURES' | 'FFS_FULL_SIM' | 'SKILL_TEST_CHECK';
+  ground_hours: number;
+  sim_ftd_hours: number;
+  sim_ffs_hours: number;
+  flight_hours?: number;
+  description: string;
+  has_exam_or_check: boolean;
+  passing_score_percent: number;
+  requires_stage_cleared_to_proceed: boolean;
+}
+
+export interface TrainingCourse {
+  id: string;
+  course_code: string;
+  course_title: string;
+  aircraft_type_id: string;
+  aircraft_type_name: string;
+  target_audience: CourseAudience;
+  has_mcc_jit: boolean;
+  mcc_jit_hours: number;
+  total_ground_hours: number;
+  total_ftd_hours: number;
+  total_ffs_hours: number;
+  total_course_hours: number;
+  estimated_duration_days: number;
+  stages: CourseStage[];
+  description: string;
+  is_active: boolean;
+}
+
 export interface TrainingBatch {
   id: string;
   batch_code: string;
@@ -63,6 +117,8 @@ export interface TrainingBatch {
   airline_operator: string;
   aircraft_type_id: string;
   aircraft_type_name: string;
+  course_id?: string;
+  course_name?: string;
   start_date: string;
   expected_completion_date: string;
   current_phase: TrainingPhase;
@@ -71,20 +127,78 @@ export interface TrainingBatch {
   status: 'ACTIVE' | 'GROUND_COMPLETE' | 'SIM_IN_PROGRESS' | 'GRADUATED';
 }
 
+export interface StageEvaluationRecord {
+  id: string;
+  student_id: string;
+  student_name: string;
+  course_id: string;
+  stage_id: string;
+  stage_name: string;
+  evaluation_date: string;
+  evaluator_instructor_id: string;
+  evaluator_instructor_name: string;
+  score_percent: number;
+  outcome: StageEvalOutcome;
+  remedial_hours_required: number;
+  cleared_for_next_stage: boolean;
+  remarks: string;
+}
+
+export interface CadetAttendanceRecord {
+  id: string;
+  student_id: string;
+  session_code: string;
+  session_title: string;
+  date: string;
+  status: 'PRESENT' | 'ABSENT' | 'EXCUSED' | 'MAKEUP_COMPLETED';
+  notes?: string;
+}
+
 export interface CadetStudent {
   id: string;
   student_number: string;
   full_name: string;
+  avatar_initials: string;
   batch_id: string;
   batch_code: string;
-  airline: string;
+  airline_sponsor: string;
+  airline?: string; // Alias for airline_sponsor
+  enrolled_course_id?: string;
+  enrolled_course_title?: string;
+  current_stage_id: string;
+  current_stage_name: string;
+  progress_percentage: number;
+  ground_hours_completed: number;
+  sim_ftd_hours_completed: number;
+  sim_ffs_hours_completed: number;
+  sim_hours_completed?: number;
+  ground_tech_completed?: boolean;
+  ground_perf_completed?: boolean;
+  mcc_jit_completed?: boolean;
+  skill_test_cleared?: boolean;
   medical_class1_expiry?: string;
   contact_email?: string;
-  ground_tech_completed: boolean;
-  ground_perf_completed: boolean;
-  sim_hours_completed: number;
-  skill_test_cleared: boolean;
+  phone?: string;
+  has_missed_sessions: boolean;
+  missed_sessions_count: number;
+  remedial_hours_assigned: number;
+  go_no_go_status: CadetGoNoGoStatus;
+  blocker_reason?: string;
   status: 'IN_TRAINING' | 'GROUND_CLEARED' | 'SIM_CLEARED' | 'LICENSED';
+}
+
+export interface InstructorQualification {
+  id: string;
+  fleet_code: string; // 'A320' | 'B737' | 'ATR 72-600' | 'Q400' | 'ALL_FLEETS'
+  role: InstructorRole; // 'SFI' | 'SFE' | 'GI_TECH' | 'GI_PERF' | 'TRI' | 'TRE'
+  approval_number: string; // e.g. 'DGCA/SFI/A320/2024-88'
+  approval_type: string; // 'SFI CAR Section 7 (Level D FFS)'
+  approval_issue_date: string; // '2024-06-15'
+  approval_expiry_date: string; // '2029-06-15' (5-year)
+  base_month: string; // 'June' (auto-derived from issue date)
+  recurrent_expiry: string; // '2027-06-30'
+  recurrent_window_start: string; // '2027-04-01'
+  status: QualificationStatus;
 }
 
 export interface InstructorProfile {
@@ -95,15 +209,20 @@ export interface InstructorProfile {
   phone: string;
   roles: InstructorRole[];
   assigned_fleets: string[]; // e.g. ['A320', 'B737', 'ATR 72-600', 'Q400']
+  
+  // Granular Qualifications per fleet / instruction type
+  qualifications: InstructorQualification[];
+
+  // Primary / Default DGCA fields (backward compatible)
   dgca_approval_number: string;
-  dgca_approval_type: string; // 'GI CAR', 'SME CAR', 'SFI CAR', 'SFE CAR'
-  dgca_5yr_approval_issue?: string; // DGCA 5-year initial approval issue date
-  dgca_5yr_approval_expiry?: string; // DGCA 5-year approval validity
-  base_month: string; // e.g. 'November'
-  recurrent_expiry: string; // e.g. '2026-11-30' (Annual recurrent check)
-  recurrent_window_start: string; // e.g. '2026-09-01' (3 months prior)
+  dgca_approval_type: string;
+  dgca_5yr_approval_issue?: string;
+  dgca_5yr_approval_expiry?: string;
+  base_month: string;
+  recurrent_expiry: string;
+  recurrent_window_start: string;
   recurrent_status: QualificationStatus;
-  last_flown_date?: string; // 90-day recency/currency check
+  last_flown_date?: string;
   currency_status?: QualificationStatus;
   employment_status: 'ACTIVE' | 'ON_LEAVE' | 'RESIGNED';
   is_locked_out: boolean;
@@ -163,6 +282,7 @@ export interface TrainingScheduleSession {
   sim_hours: number;
   total_duty_hours: number;
   status: ScheduleStatus;
+  cancellation_reason?: string;
 }
 
 export interface FDTLDutyRecord {
@@ -201,8 +321,22 @@ export interface InstructorFDTLCalculation {
 
 export interface ValidationRuleCheck {
   id: string;
-  category: 'INSTRUCTOR' | 'RECURRENT' | 'FDTL' | 'RESOURCE' | 'BATCH_PROGRESSION';
+  category: 'INSTRUCTOR' | 'RECURRENT' | 'FDTL' | 'RESOURCE' | 'BATCH_PROGRESSION' | 'PREREQUISITE';
   rule_title: string;
   passed: boolean;
   message: string;
 }
+
+export type ATOTab = 
+  | 'dashboard'
+  | 'calendar'
+  | 'scheduler'
+  | 'courses'
+  | 'cadets'
+  | 'instructors'
+  | 'pipeline'
+  | 'fleets'
+  | 'manual'
+  | 'schema';
+
+
