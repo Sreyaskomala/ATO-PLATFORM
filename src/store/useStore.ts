@@ -887,10 +887,15 @@ export const useStore = create<ATOStore>((set, get) => ({
     const resource = simulators.find((r) => r.id === form.resourceId)!;
     const selectedCadets = students.filter((s) => form.selectedStudentIds.includes(s.id));
 
-    // Calculate end time
-    const startHour = parseInt(form.startTime.split(':')[0]);
-    const endHour = startHour + Math.ceil(syllabusItem.total_duty_hours);
-    const endTimeStr = `${endHour.toString().padStart(2, '0')}:00`;
+    // Calculate end time with minute precision
+    const [startHoursStr, startMinutesStr] = form.startTime.split(':');
+    const startHour = parseInt(startHoursStr, 10) || 8;
+    const startMin = parseInt(startMinutesStr || '0', 10) || 0;
+    const dutyMinutes = Math.round(syllabusItem.total_duty_hours * 60);
+    const totalMinutes = startHour * 60 + startMin + dutyMinutes;
+    const endHour = Math.floor(totalMinutes / 60) % 24;
+    const endMin = totalMinutes % 60;
+    const endTimeStr = `${endHour.toString().padStart(2, '0')}:${endMin.toString().padStart(2, '0')}`;
 
     const newSession: TrainingScheduleSession = {
       id: `sch-${Date.now()}`,

@@ -47,25 +47,26 @@ export function calculateInstructorDutyFDTL(
   let actual24hSim = 0;
   let actual7d = 0;
 
+  // 1. Calculate actual historical duty within strictly backward rolling windows
   for (const log of historicalLogs) {
     if (log.instructor_id !== instructorId) continue;
-    const logDate = new Date(log.date);
+    const logDate = new Date(`${log.date}T23:59:59Z`);
     const logMs = logDate.getTime();
 
-    // 24h window (same day or within 24h)
-    if (Math.abs(sessionMs - logMs) < ms24h) {
+    // Strictly backward 24h rolling lookback window: [sessionMs - 24h, sessionMs]
+    if (logMs <= sessionMs && logMs >= sessionMs - ms24h) {
       actual24h += log.total_duty_hours;
       actual24hBriefing += log.briefing_hours;
       actual24hSim += log.sim_hours;
     }
 
-    // 7-day window
+    // Strictly backward 7-day rolling lookback window: [sessionMs - 7d, sessionMs]
     if (logMs <= sessionMs && logMs >= sessionMs - ms7d) {
       actual7d += log.total_duty_hours;
     }
   }
 
-  // 2. Add Scheduled Future Sessions
+  // 2. Add Scheduled Sessions occurring within the same backward rolling lookback
   let scheduled24h = 0;
   let scheduled7d = 0;
 
@@ -78,13 +79,17 @@ export function calculateInstructorDutyFDTL(
       continue;
     }
 
-    const schDate = new Date(sch.date);
+    // Use session date and end time for interval boundary
+    const schEnd = sch.end_time || '23:59';
+    const schDate = new Date(`${sch.date}T${schEnd}:00Z`);
     const schMs = schDate.getTime();
 
-    if (Math.abs(sessionMs - schMs) < ms24h) {
+    // Strictly backward 24h rolling lookback
+    if (schMs <= sessionMs && schMs >= sessionMs - ms24h) {
       scheduled24h += sch.total_duty_hours;
     }
 
+    // Strictly backward 7-day rolling lookback
     if (schMs <= sessionMs && schMs >= sessionMs - ms7d) {
       scheduled7d += sch.total_duty_hours;
     }

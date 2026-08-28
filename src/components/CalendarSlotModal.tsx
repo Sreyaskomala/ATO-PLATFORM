@@ -128,10 +128,15 @@ export const CalendarSlotModal: React.FC = () => {
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const startH = parseInt(startTime.split(':')[0], 10) || 8;
-    const dutyH = Math.ceil(currentSyllabus.total_duty_hours);
-    const endH = (startH + dutyH) % 24;
-    const endTimeStr = `${String(endH).padStart(2, '0')}:00`;
+    // Exact minute-level time resolution
+    const [startHoursStr, startMinutesStr] = startTime.split(':');
+    const startH = parseInt(startHoursStr, 10) || 8;
+    const startM = parseInt(startMinutesStr || '0', 10) || 0;
+    const dutyMinutes = Math.round(currentSyllabus.total_duty_hours * 60);
+    const totalMinutes = startH * 60 + startM + dutyMinutes;
+    const endH = Math.floor(totalMinutes / 60) % 24;
+    const endM = totalMinutes % 60;
+    const endTimeStr = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
 
     if (slotModalData.mode === 'EDIT' && slotModalData.session) {
       updateSession(slotModalData.session.id, {

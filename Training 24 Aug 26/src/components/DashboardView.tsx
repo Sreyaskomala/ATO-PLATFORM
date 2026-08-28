@@ -463,7 +463,11 @@ export const DashboardView: React.FC = () => {
                     {s.student_names.join(', ')}
                   </td>
                   <td className="py-3 text-slate-600 dark:text-slate-300">
-                    {s.total_duty_hours}h ({s.sim_hours}h Sim + {s.briefing_hours}h Brief)
+                    {s.phase === 'GROUND_TECH' || s.phase === 'GROUND_PERF' ? (
+                      <span>{s.total_duty_hours}h (Classroom Theory)</span>
+                    ) : (
+                      <span>{s.total_duty_hours}h ({s.sim_hours}h Sim + {s.briefing_hours}h Brief)</span>
+                    )}
                   </td>
                   <td className="py-3 text-right">
                     <button
