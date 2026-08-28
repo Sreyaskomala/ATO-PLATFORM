@@ -47,6 +47,12 @@ export const CalendarSlotModal: React.FC = () => {
   const [cancelReason, setCancelReason] = useState<string>('');
   const [showCancelPrompt, setShowCancelPrompt] = useState<boolean>(false);
 
+  const [selectedCadetRoles, setSelectedCadetRoles] = useState<{ [cadetId: string]: 'PF' | 'PM' | 'OBSERVER' | 'ATTENDEE' }>({});
+
+  const currentBatch = batches.find((b) => b.id === batchId) || batches[0];
+  const currentSyllabus = syllabus.find((s) => s.session_code === syllabusCode) || syllabus[0];
+  const isGroundSession = currentSyllabus.phase === 'GROUND_TECH' || currentSyllabus.phase === 'GROUND_PERF';
+
   // Initialize form from slotModalData
   useEffect(() => {
     if (!slotModalData) return;
@@ -62,6 +68,21 @@ export const CalendarSlotModal: React.FC = () => {
       setStartTime(s.start_time);
       setStatus(s.status);
       setShowCancelPrompt(false);
+
+      const roles: { [cadetId: string]: 'PF' | 'PM' | 'OBSERVER' | 'ATTENDEE' } = {};
+      const syl = syllabus.find((item) => item.session_code === s.session_code);
+      const isGround = syl?.phase === 'GROUND_TECH' || syl?.phase === 'GROUND_PERF' || s.phase === 'GROUND_TECH' || s.phase === 'GROUND_PERF';
+
+      (s.student_ids || []).forEach((id, idx) => {
+        if (isGround) {
+          roles[id] = 'ATTENDEE';
+        } else {
+          if (idx === 0) roles[id] = 'PF';
+          else if (idx === 1) roles[id] = 'PM';
+          else roles[id] = 'OBSERVER';
+        }
+      });
+      setSelectedCadetRoles(roles);
     } else {
       // CREATE Mode
       const defaultBatch = batches[0];
@@ -80,15 +101,29 @@ export const CalendarSlotModal: React.FC = () => {
       setStatus('CONFIRMED');
       setShowCancelPrompt(false);
 
+      const isGround = defaultSyllabus.phase === 'GROUND_TECH' || defaultSyllabus.phase === 'GROUND_PERF';
       const batchCadets = students.filter((stu) => stu.batch_id === defaultBatch?.id).map((stu) => stu.id);
-      setSelectedCadetIds(batchCadets.slice(0, 2));
+
+      if (isGround) {
+        setSelectedCadetIds(batchCadets);
+        const roles: { [cadetId: string]: 'PF' | 'PM' | 'OBSERVER' | 'ATTENDEE' } = {};
+        batchCadets.forEach((id) => {
+          roles[id] = 'ATTENDEE';
+        });
+        setSelectedCadetRoles(roles);
+      } else {
+        const initial = batchCadets.slice(0, 2);
+        setSelectedCadetIds(initial);
+        const roles: { [cadetId: string]: 'PF' | 'PM' | 'OBSERVER' | 'ATTENDEE' } = {};
+        if (initial[0]) roles[initial[0]] = 'PF';
+        if (initial[1]) roles[initial[1]] = 'PM';
+        setSelectedCadetRoles(roles);
+      }
     }
   }, [slotModalData, batches, syllabus, instructors, simulators, students]);
 
   if (!isSlotModalOpen || !slotModalData) return null;
 
-  const currentBatch = batches.find((b) => b.id === batchId) || batches[0];
-  const currentSyllabus = syllabus.find((s) => s.session_code === syllabusCode) || syllabus[0];
   const currentInstructor = instructors.find((i) => i.id === instructorId) || instructors[0];
   const currentResource = simulators.find((r) => r.id === resourceId) || simulators[0];
   const assignedCadets = students.filter((s) => selectedCadetIds.includes(s.id));
@@ -108,21 +143,118 @@ export const CalendarSlotModal: React.FC = () => {
   });
 
   const handleCadetToggle = (id: string) => {
-    if (selectedCadetIds.includes(id)) {
-      setSelectedCadetIds(selectedCadetIds.filter((cid) => cid !== id));
-    } else {
-      if (selectedCadetIds.length < 2) {
-        setSelectedCadetIds([...selectedCadetIds, id]);
+    if (isGroundSession) {
+      if (selectedCadetIds.includes(id)) {
+        setSelectedCadetIds(selectedCadetIds.filter((cid) => cid !== id));
+        const updated = { ...selectedCadetRoles };
+        delete updated[id];
+        setSelectedCadetRoles(updated);
       } else {
-        setSelectedCadetIds([selectedCadetIds[0], id]);
+        setSelectedCadetIds([...selectedCadetIds, id]);
+        setSelectedCadetRoles({ ...selectedCadetRoles, [id]: 'ATTENDEE' });
       }
+    } else {
+      // SIM / Flight session (up to 3: PF, PM, OBSERVER)
+      if (selectedCadetIds.includes(id)) {
+        const newIds = selectedCadetIds.filter((cid) => cid !== id);
+        setSelectedCadetIds(newIds);
+        const newRoles: { [cadetId: string]: 'PF' | 'PM' | 'OBSERVER' | 'ATTENDEE' } = {};
+        newIds.forEach((cid, idx) => {
+          if (idx === 0) newRoles[cid] = 'PF';
+          else if (idx === 1) newRoles[cid] = 'PM';
+          else newRoles[cid] = 'OBSERVER';
+        });
+        setSelectedCadetRoles(newRoles);
+      } else {
+        if (selectedCadetIds.length >= 3) {
+          // Replace the last selected or observer
+          const newIds = [selectedCadetIds[0], selectedCadetIds[1], id];
+          setSelectedCadetIds(newIds);
+          setSelectedCadetRoles({
+            [newIds[0]]: 'PF',
+            [newIds[1]]: 'PM',
+            [newIds[2]]: 'OBSERVER',
+          });
+        } else {
+          const newIds = [...selectedCadetIds, id];
+          setSelectedCadetIds(newIds);
+          const newRoles: { [cadetId: string]: 'PF' | 'PM' | 'OBSERVER' | 'ATTENDEE' } = {};
+          newIds.forEach((cid, idx) => {
+            if (idx === 0) newRoles[cid] = 'PF';
+            else if (idx === 1) newRoles[cid] = 'PM';
+            else newRoles[cid] = 'OBSERVER';
+          });
+          setSelectedCadetRoles(newRoles);
+        }
+      }
+    }
+  };
+
+  const handleSetRole = (cadetId: string, newRole: 'PF' | 'PM' | 'OBSERVER') => {
+    setSelectedCadetRoles((prev) => ({
+      ...prev,
+      [cadetId]: newRole,
+    }));
+  };
+
+  const handleSelectAllCadets = () => {
+    const batchCadetIds = students.filter((s) => s.batch_id === batchId).map((s) => s.id);
+    setSelectedCadetIds(batchCadetIds);
+    const roles: { [cadetId: string]: 'PF' | 'PM' | 'OBSERVER' | 'ATTENDEE' } = {};
+    batchCadetIds.forEach((id) => {
+      roles[id] = 'ATTENDEE';
+    });
+    setSelectedCadetRoles(roles);
+  };
+
+  const handleDeselectAllCadets = () => {
+    setSelectedCadetIds([]);
+    setSelectedCadetRoles({});
+  };
+
+  const handleSyllabusChange = (newCode: string) => {
+    setSyllabusCode(newCode);
+    const targetSyllabus = syllabus.find((s) => s.session_code === newCode);
+    const isTargetGround = targetSyllabus?.phase === 'GROUND_TECH' || targetSyllabus?.phase === 'GROUND_PERF';
+    const batchCadetIds = students.filter((s) => s.batch_id === batchId).map((s) => s.id);
+
+    if (isTargetGround) {
+      // Auto select all cadets for ground classes
+      setSelectedCadetIds(batchCadetIds);
+      const roles: { [cadetId: string]: 'PF' | 'PM' | 'OBSERVER' | 'ATTENDEE' } = {};
+      batchCadetIds.forEach((id) => {
+        roles[id] = 'ATTENDEE';
+      });
+      setSelectedCadetRoles(roles);
+    } else {
+      // Sim sessions default to 2 cadets
+      const initial = batchCadetIds.slice(0, 2);
+      setSelectedCadetIds(initial);
+      const roles: { [cadetId: string]: 'PF' | 'PM' | 'OBSERVER' | 'ATTENDEE' } = {};
+      if (initial[0]) roles[initial[0]] = 'PF';
+      if (initial[1]) roles[initial[1]] = 'PM';
+      setSelectedCadetRoles(roles);
     }
   };
 
   const handleBatchChange = (newBatchId: string) => {
     setBatchId(newBatchId);
     const newBatchCadets = students.filter((s) => s.batch_id === newBatchId).map((s) => s.id);
-    setSelectedCadetIds(newBatchCadets.slice(0, 2));
+    if (isGroundSession) {
+      setSelectedCadetIds(newBatchCadets);
+      const roles: { [cadetId: string]: 'PF' | 'PM' | 'OBSERVER' | 'ATTENDEE' } = {};
+      newBatchCadets.forEach((id) => {
+        roles[id] = 'ATTENDEE';
+      });
+      setSelectedCadetRoles(roles);
+    } else {
+      const initial = newBatchCadets.slice(0, 2);
+      setSelectedCadetIds(initial);
+      const roles: { [cadetId: string]: 'PF' | 'PM' | 'OBSERVER' | 'ATTENDEE' } = {};
+      if (initial[0]) roles[initial[0]] = 'PF';
+      if (initial[1]) roles[initial[1]] = 'PM';
+      setSelectedCadetRoles(roles);
+    }
   };
 
   const handleSave = (e: React.FormEvent) => {
@@ -137,6 +269,16 @@ export const CalendarSlotModal: React.FC = () => {
     const endH = Math.floor(totalMinutes / 60) % 24;
     const endM = totalMinutes % 60;
     const endTimeStr = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
+
+    const studentNamesWithRoles = isGroundSession
+      ? assignedCadets.map((c) => c.full_name)
+      : assignedCadets.map((c) => {
+          const role = selectedCadetRoles[c.id];
+          if (role === 'PF') return `${c.full_name} (PF)`;
+          if (role === 'PM') return `${c.full_name} (PM)`;
+          if (role === 'OBSERVER') return `${c.full_name} (Observer)`;
+          return c.full_name;
+        });
 
     if (slotModalData.mode === 'EDIT' && slotModalData.session) {
       updateSession(slotModalData.session.id, {
@@ -153,7 +295,7 @@ export const CalendarSlotModal: React.FC = () => {
         resource_id: currentResource.id,
         resource_name: currentResource.resource_name,
         student_ids: assignedCadets.map((c) => c.id),
-        student_names: assignedCadets.map((c) => c.full_name),
+        student_names: studentNamesWithRoles,
         date,
         start_time: startTime,
         end_time: endTimeStr,
@@ -178,7 +320,7 @@ export const CalendarSlotModal: React.FC = () => {
         resource_id: currentResource.id,
         resource_name: currentResource.resource_name,
         student_ids: assignedCadets.map((c) => c.id),
-        student_names: assignedCadets.map((c) => c.full_name),
+        student_names: studentNamesWithRoles,
         date,
         start_time: startTime,
         end_time: endTimeStr,
@@ -312,7 +454,7 @@ export const CalendarSlotModal: React.FC = () => {
               </label>
               <select
                 value={syllabusCode}
-                onChange={(e) => setSyllabusCode(e.target.value)}
+                onChange={(e) => handleSyllabusChange(e.target.value)}
                 className="w-full bg-slate-50 dark:bg-aviation-900 border border-slate-200 dark:border-aviation-800 rounded-xl px-3 py-2 text-xs font-mono text-slate-900 dark:text-white"
               >
                 {syllabus.map((s) => (
@@ -410,36 +552,127 @@ export const CalendarSlotModal: React.FC = () => {
           </div>
 
           {/* Row 4: Cadet Crew Selection */}
-          <div className="space-y-2">
-            <label className="text-xs font-mono font-semibold text-slate-700 dark:text-slate-300 flex items-center justify-between">
-              <span>Assigned Trainees / Cadets (PF & PM)</span>
-              <span className="text-[11px] text-slate-500 font-normal">Select up to 2 for Simulator Crew</span>
-            </label>
+          <div className="space-y-2.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+              <label className="text-xs font-mono font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                <span>
+                  {isGroundSession
+                    ? 'Assigned Batch Trainees / Ground Class Attendees'
+                    : 'Assigned Flight Crew (PF & PM + Observer)'}
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-skyline-100 dark:bg-skyline-500/20 text-skyline-700 dark:text-skyline-300">
+                  {selectedCadetIds.length} Selected
+                </span>
+              </label>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {isGroundSession ? (
+                <div className="flex items-center gap-2 text-[11px] font-mono">
+                  <button
+                    type="button"
+                    onClick={handleSelectAllCadets}
+                    className="text-skyline-600 hover:text-skyline-700 dark:text-skyline-400 font-semibold hover:underline"
+                  >
+                    Select All Batch
+                  </button>
+                  <span className="text-slate-400">•</span>
+                  <button
+                    type="button"
+                    onClick={handleDeselectAllCadets}
+                    className="text-slate-500 hover:text-slate-700 dark:text-slate-400 hover:underline"
+                  >
+                    Clear All
+                  </button>
+                </div>
+              ) : (
+                <span className="text-[11px] text-slate-500 font-mono">
+                  Mandatory 2 crew (PF + PM), optional 3rd Observer seat
+                </span>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
               {students
                 .filter((stu) => stu.batch_id === batchId)
                 .map((cadet) => {
                   const isSelected = selectedCadetIds.includes(cadet.id);
-                  const isBlocked = cadet.has_missed_sessions || cadet.go_no_go_status === 'NO_GO_BLOCKED';
+                  const isBlocked = !isGroundSession && (cadet.has_missed_sessions || cadet.go_no_go_status === 'NO_GO_BLOCKED');
+                  const role = selectedCadetRoles[cadet.id];
 
                   return (
-                    <button
-                      type="button"
+                    <div
                       key={cadet.id}
-                      onClick={() => handleCadetToggle(cadet.id)}
-                      className={`p-2.5 rounded-xl border text-left transition-all text-xs font-mono ${
+                      className={`p-3 rounded-2xl border transition-all text-xs font-mono flex flex-col justify-between gap-2 ${
                         isSelected
-                          ? 'bg-skyline-50 dark:bg-skyline-500/20 border-skyline-400 dark:border-skyline-500 text-skyline-900 dark:text-white font-bold'
-                          : 'bg-slate-50 dark:bg-aviation-900 border-slate-200 dark:border-aviation-800 text-slate-600 dark:text-slate-400'
+                          ? 'bg-skyline-50/70 dark:bg-skyline-500/15 border-skyline-400 dark:border-skyline-500 text-skyline-950 dark:text-white shadow-sm'
+                          : 'bg-slate-50 dark:bg-aviation-900/80 border-slate-200 dark:border-aviation-800 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-aviation-700'
                       }`}
                     >
-                      <div className="truncate">{cadet.full_name}</div>
-                      <div className="text-[10px] text-slate-500 truncate">{cadet.student_number}</div>
-                      {isBlocked && (
-                        <div className="text-[9px] text-rose-500 font-bold mt-1">⚠️ Missed Class</div>
+                      <div className="flex items-start justify-between gap-2">
+                        <div
+                          className="flex-1 cursor-pointer select-none"
+                          onClick={() => handleCadetToggle(cadet.id)}
+                        >
+                          <div className="font-bold truncate text-slate-900 dark:text-white flex items-center gap-1.5">
+                            <span>{cadet.full_name}</span>
+                            {isSelected && (
+                              <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block shrink-0"></span>
+                            )}
+                          </div>
+                          <div className="text-[10px] text-slate-500 truncate mt-0.5">
+                            {cadet.student_number} • {cadet.airline_sponsor}
+                          </div>
+                          {isBlocked && (
+                            <div className="text-[9px] text-rose-500 font-bold mt-1">⚠️ Missed Class</div>
+                          )}
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleCadetToggle(cadet.id)}
+                          className={`w-5 h-5 rounded-lg border flex items-center justify-center text-[10px] shrink-0 transition-colors ${
+                            isSelected
+                              ? 'bg-skyline-500 border-skyline-600 text-white font-bold'
+                              : 'border-slate-300 dark:border-aviation-700 bg-white dark:bg-aviation-950 text-transparent'
+                          }`}
+                        >
+                          ✓
+                        </button>
+                      </div>
+
+                      {/* Role selection for SIM sessions */}
+                      {!isGroundSession && isSelected && (
+                        <div className="pt-2 border-t border-skyline-200 dark:border-aviation-800 flex items-center justify-between gap-1">
+                          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">Seat / Role:</span>
+                          <div className="flex items-center gap-1">
+                            {(['PF', 'PM', 'OBSERVER'] as const).map((r) => (
+                              <button
+                                type="button"
+                                key={r}
+                                onClick={() => handleSetRole(cadet.id, r)}
+                                className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all ${
+                                  role === r
+                                    ? r === 'PF'
+                                      ? 'bg-indigo-600 text-white shadow-xs'
+                                      : r === 'PM'
+                                      ? 'bg-skyline-600 text-white shadow-xs'
+                                      : 'bg-amber-600 text-white shadow-xs'
+                                    : 'bg-slate-200/80 dark:bg-aviation-800 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-aviation-700'
+                                }`}
+                              >
+                                {r === 'OBSERVER' ? 'Observer (3rd)' : r}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
                       )}
-                    </button>
+
+                      {/* Attendee badge for Ground classes */}
+                      {isGroundSession && isSelected && (
+                        <div className="pt-1.5 border-t border-slate-200/60 dark:border-aviation-800 text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                          <span>✓ Attending Ground Theory</span>
+                        </div>
+                      )}
+                    </div>
                   );
                 })}
             </div>

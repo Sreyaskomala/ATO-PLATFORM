@@ -237,14 +237,58 @@ export function validateATOSchedulingMatrix(params: {
     });
   }
 
-  // 4. BATCH PROGRESSION & GATEKEEPER RULES (Ground School & Missed Classes)
+  // 4. CREW COMPLEMENT & PREREQUISITE GATEKEEPERS
+  const isSimPhase = syllabusItem.phase === 'SIM_FFS' || syllabusItem.phase === 'SIM_FTD' || syllabusItem.phase === 'SKILL_TEST';
+  
+  if (isSimPhase) {
+    if (students.length < 2) {
+      isValid = false;
+      checks.push({
+        id: 'chk-sim-crew-size',
+        category: 'CREW_COMPLEMENT',
+        rule_title: '4A. Simulator Crew Complement (Mandatory PF & PM)',
+        passed: false,
+        message: `Simulator session requires minimum 2 flight crew (Pilot Flying PF and Pilot Monitoring PM). Only ${students.length} cadet(s) assigned.`,
+      });
+    } else {
+      checks.push({
+        id: 'chk-sim-crew-size',
+        category: 'CREW_COMPLEMENT',
+        rule_title: '4A. Simulator Crew Complement (PF & PM + Observer)',
+        passed: true,
+        message: `Compliant Crew Complement: ${students.length === 2 ? '2 Flight Crew (PF + PM)' : '3 Flight Crew (PF + PM + Observer Seat)'} assigned.`,
+      });
+    }
+  } else {
+    // Ground class
+    if (students.length === 0) {
+      isValid = false;
+      checks.push({
+        id: 'chk-ground-batch-size',
+        category: 'CREW_COMPLEMENT',
+        rule_title: '4A. Ground Class Batch Attendance',
+        passed: false,
+        message: 'Ground class requires at least 1 trainee enrolled/assigned.',
+      });
+    } else {
+      checks.push({
+        id: 'chk-ground-batch-size',
+        category: 'CREW_COMPLEMENT',
+        rule_title: '4A. Ground Class Batch Roster',
+        passed: true,
+        message: `Ground theory classroom roster confirmed with ${students.length} batch attendees.`,
+      });
+    }
+  }
+
+  // 4B. Missed Class Gatekeeper
   const missedClassStudents = students.filter((s) => s.has_missed_sessions || s.go_no_go_status === 'NO_GO_BLOCKED');
-  if (missedClassStudents.length > 0 && (syllabusItem.phase === 'SIM_FFS' || syllabusItem.phase === 'SIM_FTD' || syllabusItem.phase === 'SKILL_TEST')) {
+  if (missedClassStudents.length > 0 && isSimPhase) {
     isValid = false;
     checks.push({
       id: 'chk-gatekeeper-missed',
       category: 'PREREQUISITE',
-      rule_title: '4A. Cadet Attendance & Missed Session Gatekeeper',
+      rule_title: '4B. Cadet Attendance & Missed Session Gatekeeper',
       passed: false,
       message: `PREREQUISITE VIOLATION: ${missedClassStudents.map((s) => `${s.full_name} (${s.blocker_reason || 'Missed required class module'})`).join('; ')}. Makeup session mandatory before proceeding to simulator!`,
     });

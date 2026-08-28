@@ -658,7 +658,8 @@ export const useStore = create<ATOStore>((set, get) => ({
 
     // 3. Match cadets belonging to this batch
     const batchCadetIds = students.filter((s) => s.batch_id === batch.id).map((s) => s.id);
-    const selectedCadets = batchCadetIds.length > 0 ? batchCadetIds.slice(0, 2) : form.selectedStudentIds;
+    const isGround = syllabusItem.phase === 'GROUND_TECH' || syllabusItem.phase === 'GROUND_PERF';
+    const selectedCadets = isGround ? batchCadetIds : (batchCadetIds.length > 0 ? batchCadetIds.slice(0, 2) : form.selectedStudentIds);
 
     set((state) => ({
       form: {
@@ -897,6 +898,15 @@ export const useStore = create<ATOStore>((set, get) => ({
     const endMin = totalMinutes % 60;
     const endTimeStr = `${endHour.toString().padStart(2, '0')}:${endMin.toString().padStart(2, '0')}`;
 
+    const isGround = syllabusItem.phase === 'GROUND_TECH' || syllabusItem.phase === 'GROUND_PERF';
+    const studentNamesWithRoles = isGround
+      ? selectedCadets.map((c) => c.full_name)
+      : selectedCadets.map((c, idx) => {
+          if (idx === 0) return `${c.full_name} (PF)`;
+          if (idx === 1) return `${c.full_name} (PM)`;
+          return `${c.full_name} (Observer)`;
+        });
+
     const newSession: TrainingScheduleSession = {
       id: `sch-${Date.now()}`,
       batch_id: batch.id,
@@ -912,7 +922,7 @@ export const useStore = create<ATOStore>((set, get) => ({
       resource_id: resource.id,
       resource_name: resource.resource_name,
       student_ids: selectedCadets.map((c) => c.id),
-      student_names: selectedCadets.map((c) => c.full_name),
+      student_names: studentNamesWithRoles,
       date: form.date,
       start_time: form.startTime,
       end_time: endTimeStr,

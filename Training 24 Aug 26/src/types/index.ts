@@ -321,7 +321,7 @@ export interface InstructorFDTLCalculation {
 
 export interface ValidationRuleCheck {
   id: string;
-  category: 'INSTRUCTOR' | 'RECURRENT' | 'FDTL' | 'RESOURCE' | 'BATCH_PROGRESSION' | 'PREREQUISITE';
+  category: 'INSTRUCTOR' | 'RECURRENT' | 'FDTL' | 'RESOURCE' | 'BATCH_PROGRESSION' | 'PREREQUISITE' | 'CREW_COMPLEMENT';
   rule_title: string;
   passed: boolean;
   message: string;

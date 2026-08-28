@@ -229,7 +229,7 @@ export const OperationsManualView: React.FC = () => {
 
   return (
     <div className="space-y-8 animate-fadeIn transition-colors duration-150 pb-16">
-      
+
       {/* 1. Header Banner */}
       <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-aviation-900/80 border border-slate-200 dark:border-aviation-800/80 backdrop-blur-xl flex flex-col lg:flex-row lg:items-center justify-between gap-6 shadow-sm dark:shadow-none">
         <div>
@@ -282,11 +282,10 @@ export const OperationsManualView: React.FC = () => {
             <button
               key={wf.id}
               onClick={() => setActiveWorkflow(wf.id)}
-              className={`p-3 rounded-2xl border text-xs font-semibold flex flex-col items-center justify-center gap-1.5 transition-all text-center ${
-                activeWorkflow === wf.id
+              className={`p-3 rounded-2xl border text-xs font-semibold flex flex-col items-center justify-center gap-1.5 transition-all text-center ${activeWorkflow === wf.id
                   ? 'bg-skyline-50 dark:bg-skyline-500/15 border-skyline-400 dark:border-skyline-500/40 text-skyline-700 dark:text-skyline-300 font-bold shadow-sm'
                   : 'bg-slate-50 dark:bg-aviation-950 border-slate-200 dark:border-aviation-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-aviation-900'
-              }`}
+                }`}
             >
               {wf.icon}
               <span className="leading-tight">{wf.label}</span>
@@ -296,7 +295,7 @@ export const OperationsManualView: React.FC = () => {
 
         {/* Workflow Detail Card */}
         <div className="p-6 rounded-2xl bg-slate-50/80 dark:bg-aviation-950/60 border border-slate-200 dark:border-aviation-800/80 space-y-4">
-          
+
           {activeWorkflow === 'scheduling' && (
             <div className="space-y-4 animate-fadeIn">
               <div className="flex items-center gap-2">
@@ -308,7 +307,7 @@ export const OperationsManualView: React.FC = () => {
               <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                 The pre-booking check must use configurable rules drawn from the organization&apos;s current approvals and manuals. A platform checklist supports compliance but does not replace operational authorization.
               </p>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
                 <div className="p-4 rounded-xl bg-white dark:bg-aviation-900 border border-slate-200 dark:border-aviation-800 space-y-2">
                   <div className="font-bold text-xs text-skyline-600 dark:text-skyline-400 font-mono">Step 1: Selection</div>

@@ -294,9 +294,32 @@ export const FlightScheduler: React.FC = () => {
 
             {/* Cadets Selection */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                Assigned Cadets for Session ({form.selectedStudentIds.length} Selected)
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  {selectedSyllabus.phase === 'GROUND_TECH' || selectedSyllabus.phase === 'GROUND_PERF'
+                    ? `Assigned Ground Class Trainees (${form.selectedStudentIds.length} Selected)`
+                    : `Assigned Flight Crew (PF & PM + Observer: ${form.selectedStudentIds.length} Selected)`}
+                </label>
+                {(selectedSyllabus.phase === 'GROUND_TECH' || selectedSyllabus.phase === 'GROUND_PERF') && (
+                  <div className="flex items-center gap-2 text-[10px] font-mono">
+                    <button
+                      type="button"
+                      onClick={() => updateForm({ selectedStudentIds: batchStudents.map((s) => s.id) })}
+                      className="text-skyline-600 hover:text-skyline-700 dark:text-skyline-400 font-semibold"
+                    >
+                      Select All
+                    </button>
+                    <span>•</span>
+                    <button
+                      type="button"
+                      onClick={() => updateForm({ selectedStudentIds: [] })}
+                      className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                )}
+              </div>
               <div className="space-y-1.5 max-h-32 overflow-y-auto pr-1">
                 {batchStudents.map((s) => {
                   const isChecked = form.selectedStudentIds.includes(s.id);
