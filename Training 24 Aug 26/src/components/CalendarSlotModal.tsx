@@ -41,7 +41,7 @@ export const CalendarSlotModal: React.FC = () => {
   const [instructorId, setInstructorId] = useState<string>('');
   const [resourceId, setResourceId] = useState<string>('');
   const [selectedCadetIds, setSelectedCadetIds] = useState<string[]>([]);
-  const [date, setDate] = useState<string>('2026-08-26');
+  const [date, setDate] = useState<string>('2026-09-01');
   const [startTime, setStartTime] = useState<string>('08:00');
   const [status, setStatus] = useState<ScheduleStatus>('CONFIRMED');
   const [cancelReason, setCancelReason] = useState<string>('');
@@ -96,7 +96,7 @@ export const CalendarSlotModal: React.FC = () => {
       setSyllabusCode(defaultSyllabus?.session_code || 'FFS-01');
       setInstructorId(defaultInstructor?.id || '');
       setResourceId(defaultResource?.id || '');
-      setDate(slotModalData.prefillDate || '2026-08-26');
+      setDate(slotModalData.prefillDate || '2026-09-01');
       setStartTime(slotModalData.prefillTime || '08:00');
       setStatus('CONFIRMED');
       setShowCancelPrompt(false);

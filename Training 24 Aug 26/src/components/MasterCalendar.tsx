@@ -46,7 +46,7 @@ export const MasterCalendar: React.FC = () => {
     setActiveTab,
   } = useStore();
 
-  const [activeMonthIndex, setActiveMonthIndex] = useState<number>(7); // August (0-indexed)
+  const [activeMonthIndex, setActiveMonthIndex] = useState<number>(8); // September (0-indexed)
   const [activeYear, setActiveYear] = useState<number>(2026);
 
   // Filter schedules
@@ -65,13 +65,13 @@ export const MasterCalendar: React.FC = () => {
 
   const hoursDay = ['06:00', '08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00'];
   const weekDays = [
-    { name: 'Mon', date: '2026-08-24' },
-    { name: 'Tue', date: '2026-08-25' },
-    { name: 'Wed (Today)', date: '2026-08-26' },
-    { name: 'Thu', date: '2026-08-27' },
-    { name: 'Fri', date: '2026-08-28' },
-    { name: 'Sat', date: '2026-08-29' },
-    { name: 'Sun', date: '2026-08-30' },
+    { name: 'Mon', date: '2026-08-31' },
+    { name: 'Tue (Today)', date: '2026-09-01' },
+    { name: 'Wed', date: '2026-09-02' },
+    { name: 'Thu', date: '2026-09-03' },
+    { name: 'Fri', date: '2026-09-04' },
+    { name: 'Sat', date: '2026-09-05' },
+    { name: 'Sun', date: '2026-09-06' },
   ];
 
   const monthNames = [
@@ -342,14 +342,14 @@ export const MasterCalendar: React.FC = () => {
         <div className="p-6 rounded-3xl bg-white dark:bg-aviation-900/80 border border-slate-200 dark:border-aviation-800 backdrop-blur-xl space-y-4 shadow-sm dark:shadow-none">
           <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-aviation-800">
             <div className="font-heading font-bold text-lg text-slate-900 dark:text-white">
-              Weekly Flight & Simulator Operations (24 Aug - 30 Aug 2026)
+              Weekly Flight & Simulator Operations (31 Aug - 06 Sep 2026)
             </div>
             <div className="flex items-center gap-3">
               <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
-                Week 35 • Click card to edit / reschedule
+                Week 36 • Click card to edit / reschedule
               </span>
               <button
-                onClick={() => openSlotModal({ mode: 'CREATE', prefillDate: '2026-08-26', prefillTime: '08:00' })}
+                onClick={() => openSlotModal({ mode: 'CREATE', prefillDate: '2026-09-01', prefillTime: '08:00' })}
                 className="px-3 py-1.5 rounded-xl bg-skyline-500 hover:bg-skyline-400 text-white text-xs font-mono font-bold flex items-center gap-1"
               >
                 <Plus className="w-3.5 h-3.5" /> Add Slot
@@ -360,7 +360,7 @@ export const MasterCalendar: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-7 gap-3">
             {weekDays.map((day) => {
               const daySessions = filteredSchedules.filter((s) => s.date === day.date);
-              const isToday = day.date === '2026-08-26';
+              const isToday = day.date === '2026-09-01';
 
               return (
                 <div
@@ -479,7 +479,7 @@ export const MasterCalendar: React.FC = () => {
                 Click any day to book / edit slots
               </span>
               <button
-                onClick={() => openSlotModal({ mode: 'CREATE', prefillDate: '2026-08-26', prefillTime: '08:00' })}
+                onClick={() => openSlotModal({ mode: 'CREATE', prefillDate: '2026-09-01', prefillTime: '08:00' })}
                 className="px-3 py-1.5 rounded-xl bg-skyline-500 hover:bg-skyline-400 text-white text-xs font-mono font-bold flex items-center gap-1"
               >
                 <Plus className="w-3.5 h-3.5" /> Book Slot
@@ -510,7 +510,7 @@ export const MasterCalendar: React.FC = () => {
                 const isValidDay = dayNum >= 1 && dayNum <= totalDaysInMonth;
                 const dateStr = `${activeYear}-${String(activeMonthIndex + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
                 const daySessions = filteredSchedules.filter((s) => s.date === dateStr);
-                const isToday = dateStr === '2026-08-26';
+                const isToday = dateStr === '2026-09-01';
 
                 return (
                   <div

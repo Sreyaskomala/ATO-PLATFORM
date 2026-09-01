@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
     const fdtl = calculateInstructorDutyFDTL(
       instructorId,
       ATO_INSTRUCTORS,
-      '2026-08-24',
+      '2026-09-01',
       0,
       ATO_ACTIVE_SCHEDULES,
       ATO_HISTORICAL_DUTY_LOGS
@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
     const fdtl = calculateInstructorDutyFDTL(
       ins.id,
       ATO_INSTRUCTORS,
-      '2026-08-24',
+      '2026-09-01',
       0,
       ATO_ACTIVE_SCHEDULES,
       ATO_HISTORICAL_DUTY_LOGS

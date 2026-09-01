@@ -79,7 +79,7 @@ export const CadetDossierView: React.FC = () => {
       student_id: cadet.id,
       session_code: 'GND-TECH-01-MAKEUP',
       session_title: 'Technical Makeup Class Cleared',
-      date: '2026-08-26',
+      date: '2026-09-01',
       status: 'MAKEUP_COMPLETED',
       notes: 'Mandatory theory makeup completed with instructor. Unblocked for FFS.',
     });

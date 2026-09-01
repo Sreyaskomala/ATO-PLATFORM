@@ -207,7 +207,7 @@ export const useStore = create<ATOStore>((set, get) => ({
 
   calendarView: 'day',
   setCalendarView: (view) => set({ calendarView: view }),
-  selectedCalendarDate: '2026-08-26',
+  selectedCalendarDate: '2026-09-01',
   setSelectedCalendarDate: (date) => set({ selectedCalendarDate: date }),
   selectedSessionModal: null,
   setSelectedSessionModal: (session) => set({ selectedSessionModal: session }),
@@ -590,7 +590,7 @@ export const useStore = create<ATOStore>((set, get) => ({
         student_id: studentId || '',
         session_code: session?.session_code || 'SES',
         session_title: session?.session_title || 'Session',
-        date: session?.date || '2026-08-26',
+        date: session?.date || '2026-09-01',
         status: status || 'PRESENT',
         notes,
       };
@@ -681,7 +681,7 @@ export const useStore = create<ATOStore>((set, get) => ({
     instructorId: ATO_INSTRUCTORS[2].id, // Capt. Rahul Sharma (SFI)
     resourceId: ATO_SIMULATORS[0].id, // A320 FFS-01
     selectedStudentIds: [ATO_STUDENTS[0].id, ATO_STUDENTS[1].id], // Aditi Rao & Rohan Verma
-    date: '2026-08-26',
+    date: '2026-09-01',
     startTime: '08:00',
   },
 
@@ -703,7 +703,7 @@ export const useStore = create<ATOStore>((set, get) => ({
             instructorId: instructors[0].id, // Tech GI
             resourceId: 'room-alpha',
             selectedStudentIds: [students[2].id, students[3].id],
-            date: '2026-08-26',
+            date: '2026-09-01',
             startTime: '09:00',
           },
         });
@@ -718,7 +718,7 @@ export const useStore = create<ATOStore>((set, get) => ({
             instructorId: instructors[1].id, // Perf GI / SME
             resourceId: 'room-beta',
             selectedStudentIds: [students[5].id],
-            date: '2026-08-26',
+            date: '2026-09-01',
             startTime: '10:00',
           },
         });
@@ -733,7 +733,7 @@ export const useStore = create<ATOStore>((set, get) => ({
             instructorId: instructors[2].id, // SFI Rahul Sharma
             resourceId: simulators[0].id, // A320 FFS-01
             selectedStudentIds: [students[0].id, students[1].id], // Cadets who cleared Ground School
-            date: '2026-08-26',
+            date: '2026-09-01',
             startTime: '08:00',
           },
         });
@@ -748,7 +748,7 @@ export const useStore = create<ATOStore>((set, get) => ({
             instructorId: instructors[3].id, // SFI Sarah Jenkins
             resourceId: simulators[1].id, // B737 FFS-01
             selectedStudentIds: [students[2].id, students[3].id], // Tanya Sen & Siddharth Nair
-            date: '2026-08-26',
+            date: '2026-09-01',
             startTime: '14:00',
           },
         });
@@ -763,7 +763,7 @@ export const useStore = create<ATOStore>((set, get) => ({
             instructorId: instructors[5].id, // Capt Rajesh Gupta
             resourceId: simulators[0].id,
             selectedStudentIds: [students[0].id, students[1].id],
-            date: '2026-08-26', // Today
+            date: '2026-09-01', // Today
             startTime: '14:00',
           },
         });
@@ -778,7 +778,7 @@ export const useStore = create<ATOStore>((set, get) => ({
             instructorId: instructors[7].id, // Elena Rostova (Refresher Lockout)
             resourceId: simulators[0].id,
             selectedStudentIds: [students[0].id, students[1].id],
-            date: '2026-08-26',
+            date: '2026-09-01',
             startTime: '08:00',
           },
         });
@@ -793,7 +793,7 @@ export const useStore = create<ATOStore>((set, get) => ({
             instructorId: instructors[3].id, // SFI Sarah Jenkins
             resourceId: simulators[0].id, // A320 FFS-01 (Mismatch!)
             selectedStudentIds: [students[2].id, students[3].id],
-            date: '2026-08-26',
+            date: '2026-09-01',
             startTime: '08:00',
           },
         });

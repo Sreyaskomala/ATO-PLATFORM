@@ -157,7 +157,7 @@ export const InstructorLegalityMatrix: React.FC = () => {
               const fdtl = calculateInstructorDutyFDTL(
                 ins.id,
                 instructors,
-                '2026-08-26',
+                '2026-09-01',
                 0,
                 schedules,
                 dutyLogs

@@ -87,7 +87,7 @@ export const RecordEvaluationModal: React.FC = () => {
       course_id: selectedCourse?.id || 'course-1',
       stage_id: selectedStage.stage_id,
       stage_name: selectedStage.stage_name,
-      evaluation_date: '2026-08-26',
+      evaluation_date: '2026-09-01',
       evaluator_instructor_id: evaluatorId,
       evaluator_instructor_name: instructors.find((i) => i.id === evaluatorId)?.full_name || 'Instructor',
       score_percent: scorePercent,

@@ -16,7 +16,7 @@ import {
 export const RenewRecurrentModal: React.FC = () => {
   const { renewModalInstructor, setRenewModalInstructor, renewInstructorRecurrent, instructors } = useStore();
 
-  const [checkDate, setCheckDate] = useState<string>('2026-08-26');
+  const [checkDate, setCheckDate] = useState<string>('2026-09-01');
   const [examinerName, setExaminerName] = useState<string>('Capt. Arun Kapur (SFE-CHIEF-301)');
   const [checkType, setCheckType] = useState<string>('Annual Standardization & PPC Check');
 

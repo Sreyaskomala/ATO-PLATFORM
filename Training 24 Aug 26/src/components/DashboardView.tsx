@@ -45,7 +45,7 @@ export const DashboardView: React.FC = () => {
     setRenewModalInstructor,
   } = useStore();
 
-  const todayStr = '2026-08-26';
+  const todayStr = '2026-09-01';
   const todaySchedules = schedules.filter((s) => s.date === todayStr);
 
   const totalSimHoursToday = todaySchedules
@@ -65,13 +65,13 @@ export const DashboardView: React.FC = () => {
 
   // Utilization chart data for 7 days
   const weekDays = [
-    { day: 'Mon', date: '2026-08-24', ffsHours: 14.5, ftdHours: 4.0, targetHours: 18.0 },
-    { day: 'Tue', date: '2026-08-25', ffsHours: 14.0, ftdHours: 4.0, targetHours: 18.0 },
-    { day: 'Wed (Today)', date: '2026-08-26', ffsHours: 16.0, ftdHours: 2.0, targetHours: 18.0 },
-    { day: 'Thu', date: '2026-08-27', ffsHours: 12.0, ftdHours: 6.0, targetHours: 18.0 },
-    { day: 'Fri', date: '2026-08-28', ffsHours: 15.0, ftdHours: 3.5, targetHours: 18.0 },
-    { day: 'Sat', date: '2026-08-29', ffsHours: 10.0, ftdHours: 4.0, targetHours: 18.0 },
-    { day: 'Sun', date: '2026-08-30', ffsHours: 8.0, ftdHours: 2.0, targetHours: 18.0 },
+    { day: 'Mon', date: '2026-08-31', ffsHours: 14.5, ftdHours: 4.0, targetHours: 18.0 },
+    { day: 'Tue (Today)', date: '2026-09-01', ffsHours: 16.0, ftdHours: 2.0, targetHours: 18.0 },
+    { day: 'Wed', date: '2026-09-02', ffsHours: 12.0, ftdHours: 6.0, targetHours: 18.0 },
+    { day: 'Thu', date: '2026-09-03', ffsHours: 15.0, ftdHours: 3.5, targetHours: 18.0 },
+    { day: 'Fri', date: '2026-09-04', ffsHours: 14.0, ftdHours: 4.0, targetHours: 18.0 },
+    { day: 'Sat', date: '2026-09-05', ffsHours: 10.0, ftdHours: 4.0, targetHours: 18.0 },
+    { day: 'Sun', date: '2026-09-06', ffsHours: 8.0, ftdHours: 2.0, targetHours: 18.0 },
   ];
 
   // Pipeline summary
@@ -410,7 +410,7 @@ export const DashboardView: React.FC = () => {
               Today's Flight & Simulator Operations
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-              Wednesday, 26 August 2026 • {todaySchedules.length} Sessions Active
+              Tuesday, 1 September 2026 • {todaySchedules.length} Sessions Active
             </p>
           </div>
 
